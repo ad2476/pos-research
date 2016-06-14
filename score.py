@@ -17,6 +17,9 @@ def calculateAccuracy(correctFile, estimateFile):
         if correct[i+1] == estimate[i+1]:
           numCorrect += 1
 
+  if total == 0:
+    return 0.0
+
   return numCorrect/float(total)
 
 if __name__ == '__main__':

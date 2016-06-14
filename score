@@ -1,0 +1,15 @@
+#!/bin/bash
+
+gold=$1
+myoutput=$2
+
+# Fill in the empty line below with whatever sequence of commands will
+# calculate and print the percentage of correctly tagged words in $myoutput,
+# using $gold as the reference.
+##############################################################################
+
+##############################################################################
+# Run this script with the command
+#   ./score data/wsj22.txt <output-of-tagger>
+
+python score.py $gold $myoutput

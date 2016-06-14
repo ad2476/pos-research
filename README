@@ -1,0 +1,11 @@
+POS
+===
+
+To run with tag:
+  ./tag data/wsj2-21.txt data/wsj22.txt data/tagged.txt
+
+To run with better_tag:
+  ./better_tag data/wsj2-21.txt data/wsj22.txt data/tagged.txt
+
+To evaluate accuracy:
+  ./score data/wsj22.txt data/tagged.txt

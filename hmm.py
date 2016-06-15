@@ -20,12 +20,14 @@ class VisibleDataHMM:
     if self.n != len(outputs): # problem
       raise ValueError("Outputs and labels should be the same size")
 
-    self.unkCount = 0
+    self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)
 
     self._trained = False
 
-  """ Train the HMM by building the sigma and tau mappings """
-  def train(self):
+  """ Train the HMM by building the sigma and tau mappings.
+      Pass this method a dict of word->count for *UNK* substitution
+  """
+  def train(self, counts):
     self.n_yy_ = {} # n_y,y' (number of times y' follows y)
     self.n_ycirc = {} # n_y,o (number of times any label follows y)
     self.n_yx = {} # n_y,x (number of times label y labels output x)
@@ -46,24 +48,11 @@ class VisibleDataHMM:
 
       self.xSet[x] = True
 
-    """self.n_yunk = {} # map y,*UNK* -> count
-    for yxtuple, yxcount in self.n_yx.iteritems():
-      y, _ = yxtuple
-      if self._better and yxcount == 1:
-        self.n_yunk[y] = self.n_yunk.get(y, 0) + 1
-      elif not self._better:
-        self.n_yunk[y] = 1 """
-
     # build sigmas
     for ytuple, yy_count in self.n_yy_.iteritems():
       y, _ = ytuple
       self.sigma[ytuple] = yy_count/float(self.n_ycirc[y])
     
-    # build taus
-    #for yxtuple, yxcount in self.n_yx.iteritems():
-    #  y, _ = yxtuple
-    #  self.tau[yxtuple] = yxcount/float(self.n_ycirc[y])
- 
   """ Return the sigma_{y,y'} for given y and y' - or 0 if dne """
   def getSigma(self, y, yprime):
     return self.sigma.get((y,yprime), 0.0)
@@ -77,9 +66,6 @@ class VisibleDataHMM:
       count = self.n_yx.get((y,"*UNK*"), 0)
     else: # x is *UNK* and we're not using better_tag
       count = 1 # tau_{y,*U*} = 1
-
-    #if x == "*UNK*":
-    #  count = self.n_yunk.get(y, 0)
 
     tau = count/float(self.n_ycirc[y])
     return tau

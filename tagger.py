@@ -4,6 +4,8 @@ import unigram
 import hmm
 import decoder
 
+better = "--better_tag"
+
 def printUsage():
     print "Tag the words in 'testfile' with their corresponding parts of speech."
     print "Usage: python tagger.py <testfile> <trainfile> <outputfile> [mode]"
@@ -14,7 +16,7 @@ def printUsage():
 
     Returns: a tuple (words, tags) where each component is a list of length n
 """
-def parseWordsTags(inputData):
+def _parseWordsTags(inputData):
 
   words = []
   tags = []
@@ -31,7 +33,7 @@ def parseWordsTags(inputData):
   return words,tags
 
 """ Like parseWordsTags() but replaces any word with occurrence of 1 to *UNK* """
-def parseWordsBetterTags(inputData, counts):
+def parseWordsTags(inputData, counts, mode):
   words = []
   tags = []
 
@@ -43,7 +45,7 @@ def parseWordsBetterTags(inputData, counts):
     for i in xrange(0, len(sentence), 2):
       word = sentence[i]
       label = sentence[i+1]
-      if counts[word] == 1:
+      if (counts[word] == 1) and (mode == better):
         word = "*UNK*" # replace with *UNK*
 
       words.append(word)
@@ -79,36 +81,26 @@ if __name__ == '__main__':
   counts, _ = lm.buildCounts(trainData) # Build word counts from the input
 
   data = None
-  better = mode == "--better_tag"
   try:
-    if not better:
-      data = parseWordsTags(trainData)
-    elif better:
-      data = parseWordsBetterTags(trainData, counts)
-    else:
-      printUsage()
-      sys.exit(1)
+    data = parseWordsTags(trainData, counts, mode)
   except IndexError:
     print "Error parsing input: Bad format"
     sys.exit(1)
 
   words,tags = data
   try:
-    model = hmm.VisibleDataHMM(words, tags, better) # feed data
-    model.train() # actually build sigma and tau
+    model = hmm.VisibleDataHMM(words, tags, mode == better) # feed data
+    model.train(counts) # actually build sigma and tau
 
     viterbi = decoder.ViterbiDecoder(model, counts)
 
     # decode the test file:
     for line in testData:
       sentence = line.split()[::2]
-      sentence = [word if counts.get(word,0) else "*UNK*" for word in sentence]
-      #print sentence
+      #sentence = [word if counts.get(word,0) else "*UNK*" for word in sentence]
       yhat = viterbi.decode(sentence)
       tagged = taggedSequenceToStr(sentence, yhat)
-      #print yhat
       outFile.write(tagged+"\n")
-      #raw_input("continue?")
 
   except SyntaxError as e:
     print e

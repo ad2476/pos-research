@@ -25,13 +25,13 @@ class ViterbiDecoder:
       word = sentence[i]
       if (self.wordCounts.get(word, 0) == 0) or (word is "*UNK*"):
         self.hmm.unkCount += 1
-        word = "*UNK*"
+        #word = "*UNK*"
 
       argmax = (None, 0.0)
       for y in states: # argmax over every possible state y
         _, maxmu = argmax
         mu = prev_mu*self.hmm.getSigma(yprime,y)*self.hmm.getTau(y,word)
-        #mu = self.hmm.n_yx.get((y,word), 0.0)
+        #mu = self.hmm.n_yx.get((y,word), 0.0) # "stupid" decoder - most freq.
 
         if mu >= maxmu:
           argmax = (y,mu)

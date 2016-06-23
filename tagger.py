@@ -11,29 +11,9 @@ def printUsage():
     print "Usage: python tagger.py <testfile> <trainfile> <outputfile> [mode]"
     print "\tmode: --tag or --better_tag"
 
-""" Read an input list, formatted such that each element is a string of
-    {word TAG word TAG ...} pairs.
-
-    Returns: a tuple (words, tags) where each component is a list of length n
-"""
-def _parseWordsTags(inputData):
-
-  words = []
-  tags = []
-
-  stopPair = hmm.STOP + " " + hmm.STOP
-  for line in inputData:
-    line = stopPair + " " + line + stopPair # pad with stop symbols
-    sentence = line.split()
-    # i increments by 2 from 0 to len(sentence)
-    for i in xrange(0, len(sentence), 2):
-      words.append(sentence[i])
-      tags.append(sentence[i+1])
-
-  return words,tags
 
 """ Like parseWordsTags() but replaces any word with occurrence of 1 to *UNK* """
-def parseWordsTags(inputData, counts, mode):
+def parseWordsTags(inputData):
   words = []
   tags = []
 
@@ -45,8 +25,6 @@ def parseWordsTags(inputData, counts, mode):
     for i in xrange(0, len(sentence), 2):
       word = sentence[i]
       label = sentence[i+1]
-      if (counts[word] == 1) and (mode == better):
-        word = "*UNK*" # replace with *UNK*
 
       words.append(word)
       tags.append(label)
@@ -82,7 +60,7 @@ if __name__ == '__main__':
 
   data = None
   try:
-    data = parseWordsTags(trainData, counts, mode)
+    data = parseWordsTags(trainData)
   except IndexError:
     print "Error parsing input: Bad format"
     sys.exit(1)
@@ -97,7 +75,7 @@ if __name__ == '__main__':
     # decode the test file:
     for line in testData:
       sentence = line.split()[::2]
-      #sentence = [word if counts.get(word,0) else "*UNK*" for word in sentence]
+      sentence = [word if counts.get(word,0) else "*UNK*" for word in sentence]
       yhat = viterbi.decode(sentence)
       tagged = taggedSequenceToStr(sentence, yhat)
       outFile.write(tagged+"\n")

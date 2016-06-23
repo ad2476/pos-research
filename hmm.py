@@ -24,6 +24,8 @@ class VisibleDataHMM:
 
     self._trained = False
 
+    self._alpha = 1 # add-alpha
+
   """ Train the HMM by building the sigma and tau mappings.
       Pass this method a dict of word->count for *UNK* substitution
   """
@@ -39,6 +41,11 @@ class VisibleDataHMM:
       ytuple = (y,y_)
 
       x = self._outputs[i] # corresponding output
+      if counts[x] == 1 and self._better:
+        yunk = (y,"*UNK*")
+        self.n_yx[yunk] = self.n_yx.get(yunk, 0) + 1
+        self.xSet["*UNK*"] = True
+        
       yxtuple = (y,x)
 
       self.n_yy_[ytuple] = self.n_yy_.get(ytuple, 0) + 1
@@ -49,13 +56,13 @@ class VisibleDataHMM:
       self.xSet[x] = True
 
     # build sigmas
-    for ytuple, yy_count in self.n_yy_.iteritems():
-      y, _ = ytuple
-      self.sigma[ytuple] = yy_count/float(self.n_ycirc[y])
+    self.tagsetSize = len(self.n_ycirc.keys())
     
   """ Return the sigma_{y,y'} for given y and y' - or 0 if dne """
   def getSigma(self, y, yprime):
-    return self.sigma.get((y,yprime), 0.0)
+    ytuple = (y,yprime)
+    return (self.n_yy_.get(ytuple, 0)+self._alpha)/float(self.n_ycirc.get(y,0) + self._alpha*self.tagsetSize)
+
 
   """ Return the tau_{y,x} for given y and x - or 0 if dne """
   def getTau(self, y, x):
@@ -72,4 +79,4 @@ class VisibleDataHMM:
 
   """ Return a copy of the labels of this HMM """
   def getLabels(self):
-      return list(self.n_ycirc.keys())
+    return list(self.n_ycirc.keys())

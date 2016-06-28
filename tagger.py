@@ -3,6 +3,7 @@ import itertools
 import unigram
 import hmm
 import decoder
+import preparser
 
 better = "--better_tag"
 
@@ -10,26 +11,6 @@ def printUsage():
     print "Tag the words in 'testfile' with their corresponding parts of speech."
     print "Usage: python tagger.py <testfile> <trainfile> <outputfile> [mode]"
     print "\tmode: --tag or --better_tag"
-
-
-""" Like parseWordsTags() but replaces any word with occurrence of 1 to *UNK* """
-def parseWordsTags(inputData):
-  words = []
-  tags = []
-
-  stopPair = hmm.STOP + " " + hmm.STOP
-  for line in inputData:
-    line = stopPair + " " + line + stopPair # pad with stop symbols
-    sentence = line.split()
-    # i increments by 2 from 0 to len(sentence)
-    for i in xrange(0, len(sentence), 2):
-      word = sentence[i]
-      label = sentence[i+1]
-
-      words.append(word)
-      tags.append(label)
-
-  return words,tags
 
 """ Given a sentence list and tag list, format proper output string: """
 def taggedSequenceToStr(sentence, tags):
@@ -58,9 +39,11 @@ if __name__ == '__main__':
   lm = unigram.UnigramLangmod(None, None) # We don't actually need this for langmod
   counts, _ = lm.buildCounts(trainData) # Build word counts from the input
 
+  WSJPreparser = preparser.EnglishWSJParser(trainData)
+
   data = None
   try:
-    data = parseWordsTags(trainData)
+    data = WSJPreparser.parseWordsTags()
   except IndexError:
     print "Error parsing input: Bad format"
     sys.exit(1)

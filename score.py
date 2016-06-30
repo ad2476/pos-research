@@ -1,20 +1,23 @@
 import sys
 import itertools
+import preparser
 
 def printUsage():
   print "Usage: python score.py <correct> <tagger_output>"
 
-def calculateAccuracy(correctFile, estimateFile):
+def calculateAccuracy(filePreparser, correctFile, estimateFile):
   
   numCorrect = 0
   total = 0
   for correct,estimate in itertools.izip(correctFile, estimateFile):
-    correct = correct.split()
-    estimate = estimate.split()
-    total += len(estimate)/2.0
-    if len(correct) == len(estimate):
-      for i in xrange(0, len(correct), 2):
-        if correct[i+1] == estimate[i+1]:
+    #correct = correct.split()
+    #estimate = estimate.split()
+    _, correctTags = filePreparser([correct]).parseWordsTags()
+    _, estimateTags = filePreparser([estimate]).parseWordsTags()
+    total += len(estimateTags)
+    if len(correctTags) == len(estimateTags):
+      for i in xrange(0, len(correctTags)):
+        if correctTags[i] == estimateTags[i]:
           numCorrect += 1
 
   if total == 0:
@@ -31,7 +34,7 @@ if __name__ == '__main__':
   testFile = open(sys.argv[1], 'r')
   outputFile = open(sys.argv[2], 'r')
 
-  accuracy = calculateAccuracy(testFile, outputFile)
+  accuracy = calculateAccuracy(preparser.SanskritJNUParser, testFile, outputFile)
 
   print accuracy
 

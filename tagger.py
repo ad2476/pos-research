@@ -44,6 +44,9 @@ if __name__ == '__main__':
     model = hmm.VisibleDataHMM(words, tags, mode == better) # feed data
     model.train(counts) # actually build sigma and tau
 
+    W_size = len(counts) # unique word types
+    print str(W_size) + " unique words, " + str(len(model.getLabels())) + " labels"
+
     viterbi = decoder.ViterbiDecoder(model, counts)
 
     # decode the test file:

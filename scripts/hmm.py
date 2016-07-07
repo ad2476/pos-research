@@ -2,6 +2,25 @@
 
 STOP = "**@sToP@**" # The stop symbol
 
+class HiddenDataHMM:
+
+  """ Construct the HMM object using a list of outputs. """
+  def __init__(self, outputs):
+    self._outputs = outputs
+
+  """ Train the HMM using EM to estimate sigma and tau distributions """
+  def train(self):
+    pass
+
+  def getSigma(self, y, yprime):
+    pass
+
+  def getTau(self, y, x):
+    pass
+
+  def getLabels(self):
+    pass
+
 """ A Hidden Markov Model constructed from visible data """
 class VisibleDataHMM:
 

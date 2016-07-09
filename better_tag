@@ -24,7 +24,7 @@ output=$3
 # Run this script with the command
 #   ./better_tag data/wsj2-21.txt data/wsj22.txt output.txt
 
-python scripts/tagger.py $training $testdata $output --better_tag
+python2 scripts/tagger.py $training $testdata $output --better_tag
 
 printf "Score: "
-python scripts/score.py $testdata $output
+python2 scripts/score.py $testdata $output

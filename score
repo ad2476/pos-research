@@ -12,4 +12,4 @@ myoutput=$2
 # Run this script with the command
 #   ./score data/wsj22.txt <output-of-tagger>
 
-python scripts/score.py $gold $myoutput
+python2 scripts/score.py $gold $myoutput

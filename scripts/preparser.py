@@ -12,19 +12,24 @@ class EnglishWSJParser:
 
   """ Parse the outputs and tags into separate lists """
   def parseWordsTags(self):
-    words = []
-    tags = []
+    words = [] # list of list of words
+    tags = [] # list of list of tags
 
     for line in self._rawdata:
       line = self._stopPair + " " + line + self._stopPair # pad with stop symbols
       sentence = line.split()
+      words_i = []
+      tags_i = []
       # i increments by 2 from 0 to len(sentence)
       for i in xrange(0, len(sentence), 2):
         word = sentence[i]
         label = sentence[i+1]
 
-        words.append(word)
-        tags.append(label)
+        words_i.append(word)
+        tags_i.append(label)
+
+      words.append(words_i)
+      tags.append(tags_i)
 
     return words,tags
 
@@ -45,8 +50,8 @@ class SanskritJNUParser:
     self._stopPair = "%s[%s]" % (STOP, STOP)
 
   def parseWordsTags(self):
-    words = []
-    tags = []
+    words = [] # list of sentences' words
+    tags = [] # list of sentences' tags
 
     for line in self._rawdata:
       line = "%s %s %s" % (self._stopPair, line, self._stopPair)
@@ -55,9 +60,9 @@ class SanskritJNUParser:
       # capturing group before a literal '[' char:
       #  match at least 0 times,lazy, on a group consisting of:
       #   not whitespace, not a ']' char
-      words.extend(re.findall(r"([^\s\]]*?)\[", line))
+      words.append(re.findall(r"([^\s\]]*?)\[", line))
 
-      tags.extend(re.findall(r"\[(.*?)\]", line)) # find everything within brackets
+      tags.append(re.findall(r"\[(.*?)\]", line)) # find everything within brackets
 
     return words,tags
 

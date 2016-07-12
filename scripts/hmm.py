@@ -89,7 +89,7 @@ class HiddenDataHMM:
 
     iterations = 0
     while iterations < self._ITER_CAP:
-      print "\titeration %i" % iterations
+      print "iteration %i" % iterations
       expected_yy_ = defaultdict(float) # E[n_{y,y'}|x]: (y,y')->float
       expected_yx = defaultdict(float) # E[n_{y,x}|x]: (y,x)->float
       expected_ycirc = defaultdict(float) # E[n_{y,\circ}|x]: y->float

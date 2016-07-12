@@ -16,6 +16,8 @@ class HiddenDataHMM:
     self._sigma = defaultdict(self._paramSmooth)
     self._tau = defaultdict(self._paramSmooth)
 
+    self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)
+
     random.seed()
 
   """ Custom smoothing function for the defaultdicts _sigma and _tau """

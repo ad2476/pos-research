@@ -22,9 +22,7 @@ class UnigramLangmod:
     # Populate n_w(d) aka counts dict
     n_o = 0
     for line in document:
-      words = line.split()
-      words.insert(0, self.STOP)
-      words.append(self.STOP)
+      words = line
       for word in words:
         n = counts.get(word, 0) + 1
         counts[word] = n

@@ -12,11 +12,11 @@ class EnglishWSJParser:
 
   """ Parse the outputs and tags into separate lists """
   def parseWordsTags(self):
-    words = [STOP]
-    tags = [STOP]
+    words = []
+    tags = []
 
     for line in self._rawdata:
-      line = "%s %s" % (line, self._stopPair)
+      line = "%s %s %s" % (self._stopPair, line, self._stopPair)
       sentence = line.split()
       words_i = []
       tags_i = []
@@ -50,11 +50,11 @@ class SanskritJNUParser:
     self._stopPair = "%s[%s]" % (STOP, STOP)
 
   def parseWordsTags(self):
-    words = [STOP]
-    tags = [STOP]
+    words = []
+    tags = []
 
     for line in self._rawdata:
-      line = "%s %s" % (line, self._stopPair)
+      line = "%s %s %s" % (self._stopPair, line, self._stopPair)
       # each line is formatted: "WORD[TAG] WORD[TAG] WORD[TAG]DANDA[TAG]\n"
       
       # capturing group before a literal '[' char:

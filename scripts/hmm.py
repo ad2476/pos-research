@@ -1,5 +1,6 @@
 from collections import defaultdict
-
+import random
+import itertools
 
 STOP = "**@sToP@**" # The stop symbol
 
@@ -15,9 +16,11 @@ class HiddenDataHMM:
     self._sigma = defaultdict(self._paramSmooth)
     self._tau = defaultdict(self._paramSmooth)
 
+    random.seed()
+
   """ Custom smoothing function for the defaultdicts _sigma and _tau """
-  def _paramSmooth(self, pair):
-    return 0.0
+  def _paramSmooth(pair):
+    return 0.01*random.uniform(0.95,1.05)
 
   """ Compute alpha for the current timestep
         prevAlpha: dictionary of alpha(i-1): y->float
@@ -73,17 +76,28 @@ class HiddenDataHMM:
   def _expTransitionFreq(self, alpha_y, beta_yprime, sigma, tau, totalProb):
     return float(alpha_y*sigma*tau*beta_yprime)/totalProb
 
-  """ Train the HMM using EM to estimate sigma and tau distributions """
-  def train(self):
+  """ Train the HMM using EM to estimate sigma and tau distributions.
+        start_distribution: tuple (sigma, tau) defaultdicts representing an
+                            initial distribution (optional)
+  """
+  def train(self, start_distribution=None):
+    print "Beginning train iterations (EM)..."
+    if start_distribution:
+      self._sigma, self._tau = start_distribution
 
     iterations = 0
     while iterations < self._ITER_CAP:
+      print "\titeration %i" % iterations
       expected_yy_ = defaultdict(float) # E[n_{y,y'}|x]: (y,y')->float
       expected_yx = defaultdict(float) # E[n_{y,x}|x]: (y,x)->float
       expected_ycirc = defaultdict(float) # E[n_{y,\circ}|x]: y->float
 
       # (E-step):
+      s = 0
       for sentence in self._sentences:
+        print "- sentence: %i" % s
+        s+=1
+
         n = len(sentence)
         alpha = [None for _ in range(0,n)]
         beta = [None for _ in range(0,n)]
@@ -94,15 +108,19 @@ class HiddenDataHMM:
         # iterate over sentence without initial STOP for alpha, last STOP for beta
         # e.g. [STOP, "hello", "world", STOP]
         # Calculate alpha and beta using our sigmas and taus
+        print "-- compute alpha and beta:"
         for i in xrange(1,n):
+          print "--- word %i" % i
           j = n - i - 1
           x_i = sentence[i]
           x_j1 = sentence[j+1]
-          alpha[i] = self._computeNextAlpha(alpha[i-1], x_i)
-          beta[j] = self._computeNextBeta(beta[j+1], x_j1)
+          alpha[i] = self._computeAlpha(alpha[i-1], x_i)
+          beta[j] = self._computeBeta(beta[j+1], x_j1)
 
         # Here we go again, now to calculate expectations
+        print "-- compute expectations:"
         for i in xrange(0,n-1):
+          print "--- word %i" %i
           x = sentence[i]
           nextX = sentence[i+1]
           for y in self._states:
@@ -128,16 +146,16 @@ class HiddenDataHMM:
         y, _ = emission
         self._tau[emission] = expectation/expected_ycirc[y]
 
-      iterations += 1
+      iterations += 1 # increment iterations count
 
   def getSigma(self, y, yprime):
-    pass
+    return self._sigma[(y,yprime)]
 
   def getTau(self, y, x):
-    pass
+    return self._tau[(y,x)]
 
   def getLabels(self):
-    pass
+    return self._states
 
 """ A Hidden Markov Model constructed from visible data """
 class VisibleDataHMM:
@@ -146,15 +164,15 @@ class VisibleDataHMM:
       better: True for better_tag, False for tag
   """
   def __init__(self, outputs, labels, better):
-    self._outputs = outputs
-    self._labels = labels
+    self._outputs = outputs # list of list of words
+    self._labels = labels # list of list of states
     self._better = better
 
     self.sigma = {}
     self.tau = {}
     self.xSet = {} # set of unique outputs
-    self.n = len(labels)
-    if self.n != len(outputs): # problem
+    self.n_sentences = len(labels)
+    if self.n_sentences != len(outputs): # problem
       raise ValueError("Outputs and labels should be the same size")
 
     self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)
@@ -172,25 +190,27 @@ class VisibleDataHMM:
     self.n_yx = {} # n_y,x (number of times label y labels output x)
 
     # build counts
-    for i in xrange(0, self.n - 1):
-      y = self._labels[i]
-      y_ = self._labels[i+1] # y_ = y'
-      ytuple = (y,y_)
+    for words,tags in itertools.izip(self._outputs,self._labels):
+      n = len(words)
+      for i in xrange(0, n - 1):
+        y = tags[i]
+        y_ = tags[i+1] # y_ = y'
+        ytuple = (y,y_)
 
-      x = self._outputs[i] # corresponding output
-      if counts[x] == 1 and self._better:
-        yunk = (y,"*UNK*")
-        self.n_yx[yunk] = self.n_yx.get(yunk, 0) + 1
-        self.xSet["*UNK*"] = True
-        
-      yxtuple = (y,x)
+        x = words[i] # corresponding output
+        if counts[x] == 1 and self._better:
+          yunk = (y,"*UNK*")
+          self.n_yx[yunk] = self.n_yx.get(yunk, 0) + 1
+          self.xSet["*UNK*"] = True
+          
+        yxtuple = (y,x)
 
-      self.n_yy_[ytuple] = self.n_yy_.get(ytuple, 0) + 1
-      self.n_ycirc[y] = self.n_ycirc.get(y, 0) + 1
+        self.n_yy_[ytuple] = self.n_yy_.get(ytuple, 0) + 1
+        self.n_ycirc[y] = self.n_ycirc.get(y, 0) + 1
 
-      self.n_yx[yxtuple] = self.n_yx.get(yxtuple, 0) + 1
+        self.n_yx[yxtuple] = self.n_yx.get(yxtuple, 0) + 1
 
-      self.xSet[x] = True
+        self.xSet[x] = True
 
     # build sigmas
     self.tagsetSize = len(self.n_ycirc.keys())

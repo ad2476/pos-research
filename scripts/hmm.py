@@ -10,7 +10,7 @@ class HiddenDataHMM:
 
   """ Construct the HMM object using a list of outputs and a set of posLabels. """
   def __init__(self, outputs, posLabels, labelHash=None):
-    self._ITER_CAP = 10
+    self._ITER_CAP = 1
 
     self._sentences = [[hash(x) for x in sentence] for sentence in outputs]
     self._numStates = len(posLabels)
@@ -26,7 +26,7 @@ class HiddenDataHMM:
 
     self._STOPTAG = self._labelHash[STOP] # which one is the stop tag?
 
-    self._sigma = np.full([self._numStates]*2, 0.01)*np.random.uniform(0.95,1.05) # [y,yprime]->prob.
+    self._sigma = np.full([self._numStates]*2, 0.01)*np.random.uniform(0.95,1.05) # [y,y']->prob
     self._tau = defaultdict(self._paramSmooth)
 
     self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)
@@ -60,6 +60,12 @@ class HiddenDataHMM:
       for yprime in self._states:
         val += beta[i+1][yprime]*self._sigma[y,yprime]*self._tau[(yprime,xNext)]
       beta[i][y] = val
+
+  """ Normalise alpha_i and beta_i (both row vectors) """
+  def _normaliseAlphaBeta(self, alpha_i, beta_i):
+    normFactor = np.sum(alpha_i)
+    alpha_i = alpha_i/normFactor
+    beta_i = beta_i/normFactor
 
   """ Not used rn, not compat with np structure!! """
   def _forwardBackward(self, prevFwdBwd, x_i, x_j1):
@@ -104,23 +110,21 @@ class HiddenDataHMM:
     if start_distribution:
       self._sigma, self._tau = start_distribution
 
-    iterations = 0
+    iterations = 1
     n_sentence = len(self._sentences)
-    while iterations < self._ITER_CAP:
+    while iterations <= self._ITER_CAP:
       print "iteration %i" % iterations
       expected_yy_ = np.zeros([self._numStates]*2) # E[n_{y,y'}|x]: (y,y')->float
       expected_yx = defaultdict(float) # E[n_{y,x}|x]: (y,x)->float
       expected_ycirc = np.zeros(self._numStates) # E[n_{y,\circ}|x]: y->float
 
       # (E-step):
-      s = 0
+      s = 1
       for sentence in self._sentences:
-        print "- sentence: %i of %i \t\t (iteration %i)" % (s, n_sentence, iterations)
+        print "- sentence: %i of %i \t\t (iteration %i/%i)" % (s, n_sentence, iterations, self._ITER_CAP)
         s+=1
 
         n = len(sentence)
-        alpha = np.zeros([n, self._numStates])
-        beta = np.zeros([n, self._numStates])
 
         ALPHA, BETA = 0, 1 # indices
         alphaBetaMat = np.zeros([2, n, self._numStates]) # [alpha or beta][timestep][state] -> prob.
@@ -134,6 +138,7 @@ class HiddenDataHMM:
         print "-- compute alpha and beta:"
         alphas = alphaBetaMat[ALPHA,:,:]
         betas = alphaBetaMat[BETA,:,:]
+
         for i in xrange(1,n):
           print "--- word %i" % i
           j = n - i - 1
@@ -141,6 +146,9 @@ class HiddenDataHMM:
           x_j1 = sentence[j+1]
           self._computeAlphasTimestep(alphas, i, x_i) # compute alphas for this timestep
           self._computeBetasTimestep(betas, j, x_j1) # compute betas for this timestep
+
+        for i in xrange(1,n):
+          self._normaliseAlphaBeta(alphas[i], betas[i])
 
         # Here we go again, now to calculate expectations
         print "-- compute expectations:"
@@ -157,9 +165,10 @@ class HiddenDataHMM:
             expected_ycirc[y] += expOutputFreq
 
             for y_ in self._states: # iterate over y' for E[n_{y,y'}|x]
-              beta_y_ = beta[i+1][y_]
+              beta_y_ = betas[i+1][y_]
               sigma = self._sigma[y,y_]
               tau = self._tau[(y_,nextX)]
+              a = self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
               expected_yy_[y,y_] += self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
 
       # (M-step): update sigma and tau
@@ -173,17 +182,23 @@ class HiddenDataHMM:
 
       iterations += 1 # increment iterations count
 
+    print self._sigma
+
   def getSigma(self, y, yprime):
     y = self._labelHash[y]
     yprime = self._labelHash[yprime]
+    print (y, yprime)
     return self._sigma[y,yprime]
 
   def getTau(self, y, x):
     y = self._labelHash[y]
     return self._tau[(y,hash(x))]
 
+  def getState(self, tag): # Return the internal state value corresponding to the given POS tag
+    return self._labelHash[tag]
+
   def getLabels(self):
-    return self._states # these are hashed
+    return self._labelHash.keys()
 
 """ A Hidden Markov Model constructed from visible data """
 class VisibleDataHMM:

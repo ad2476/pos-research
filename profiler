@@ -1,0 +1,10 @@
+#!/bin/bash
+
+training=$1
+testdata=$2
+output=$3
+
+python2 -m cProfile -o debug/stats scripts/tagger.py $training $testdata $output --better_tag
+
+python2 scripts/profile.py | less
+

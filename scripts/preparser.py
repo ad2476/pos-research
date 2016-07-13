@@ -73,7 +73,7 @@ class SanskritJNUParser:
     n = len(words)
     output = ""
     for i in xrange(0, n):
-      output += words[i] + "[" + tags[i] + "] "
+      output += "%s[%s] " % (words[i], tags[i])
 
     return output
 

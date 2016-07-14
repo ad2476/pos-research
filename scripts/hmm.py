@@ -10,7 +10,7 @@ class HiddenDataHMM:
 
   """ Construct the HMM object using a list of outputs and a set of posLabels. """
   def __init__(self, outputs, posLabels, labelHash=None):
-    self._ITER_CAP = 1
+    self._ITER_CAP = 5
 
     self._sentences = [[hash(x) for x in sentence] for sentence in outputs]
     self._numStates = len(posLabels)
@@ -168,7 +168,6 @@ class HiddenDataHMM:
               beta_y_ = betas[i+1][y_]
               sigma = self._sigma[y,y_]
               tau = self._tau[(y_,nextX)]
-              a = self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
               expected_yy_[y,y_] += self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
 
       # (M-step): update sigma and tau
@@ -187,7 +186,6 @@ class HiddenDataHMM:
   def getSigma(self, y, yprime):
     y = self._labelHash[y]
     yprime = self._labelHash[yprime]
-    print (y, yprime)
     return self._sigma[y,yprime]
 
   def getTau(self, y, x):

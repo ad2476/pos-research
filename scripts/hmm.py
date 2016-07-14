@@ -10,9 +10,10 @@ class HiddenDataHMM:
 
   """ Construct the HMM object using a list of outputs and a set of posLabels. """
   def __init__(self, outputs, posLabels, labelHash=None):
-    self._ITER_CAP = 5
+    self._ITER_CAP = 1
 
-    self._sentences = [[hash(x) for x in sentence] for sentence in outputs]
+    #self._sentences = [[hash(x) for x in sentence] for sentence in outputs]
+    self._sentences = outputs
     self._numStates = len(posLabels)
     self._states = xrange(0,self._numStates) # faster np.array indexing
 
@@ -101,6 +102,76 @@ class HiddenDataHMM:
   def _expTransitionFreq(self, alpha_y, beta_yprime, sigma, tau, totalProb):
     return float(alpha_y*sigma*tau*beta_yprime)/totalProb
 
+  """ Perform the E-Step of EM. Return the expectations. """
+  def _do_EStep(self, iteration):
+    expected_yy_ = np.zeros([self._numStates]*2) # E[n_{y,y'}|x]: (y,y')->float
+    expected_yx = defaultdict(float) # E[n_{y,x}|x]: (y,x)->float
+    expected_ycirc = np.zeros(self._numStates) # E[n_{y,\circ}|x]: y->float
+
+    s = 1
+    n_sentence = len(self._sentences)
+    for sentence in self._sentences:
+      print "- sentence: %i of %i \t\t (iteration %i/%i)" % (s, n_sentence, iteration, self._ITER_CAP)
+      s+=1
+
+      n = len(sentence)
+
+      ALPHA, BETA = 0, 1 # indices
+      alphaBetaMat = np.zeros([2, n, self._numStates]) # [alpha or beta][timestep][state] -> prob.
+
+      alphaBetaMat[ALPHA][0][self._STOPTAG] = 1.0
+      alphaBetaMat[BETA][n-1][self._STOPTAG] = 1.0
+
+      # iterate over sentence without initial STOP for alpha, last STOP for beta
+      # e.g. [STOP, "hello", "world", STOP]
+      # Calculate alpha and beta using our sigmas and taus
+      print "-- compute alpha and beta:"
+      alphas = alphaBetaMat[ALPHA,:,:]
+      betas = alphaBetaMat[BETA,:,:]
+
+      for i in xrange(1,n):
+        print "--- word %i" % i
+        j = n - i - 1
+        x_i = sentence[i]
+        x_j1 = sentence[j+1]
+        self._computeAlphasTimestep(alphas, i, x_i) # compute alphas for this timestep
+        self._computeBetasTimestep(betas, j, x_j1) # compute betas for this timestep
+
+      for i in xrange(1,n):
+        self._normaliseAlphaBeta(alphas[i], betas[i])
+
+      # Here we go again, now to calculate expectations
+      print "-- compute expectations:"
+      for i in xrange(0,n-1):
+        print "--- word %i" %i
+        x = sentence[i]
+        nextX = sentence[i+1]
+        for y in self._states:
+          alpha_y = alphas[i][y]
+          beta_y = betas[i][y]
+          totalProb = alphas[n-1][self._STOPTAG]
+          expOutputFreq = self._expEmissionFreq(alpha_y, beta_y, totalProb)
+          expected_yx[(y,x)] += expOutputFreq
+          expected_ycirc[y] += expOutputFreq
+
+          for y_ in self._states: # iterate over y' for E[n_{y,y'}|x]
+            beta_y_ = betas[i+1][y_]
+            sigma = self._sigma[y,y_]
+            tau = self._tau[(y_,nextX)]
+            expected_yy_[y,y_] += self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
+
+    return (expected_yx, expected_yy_, expected_ycirc) # return expectations
+
+  """ Perform the M-Step of EM. Update sigma and tau mappings using expectations. """ 
+  def _do_MStep(self, expected_yx, expected_yy_, expected_ycirc):
+    for y in self._states:
+      for yprime in self._states:
+        self._sigma[y,yprime] = expected_yy_[y,yprime]/expected_ycirc[y]
+
+    for emission,expectation in expected_yx.iteritems():
+      y, _ = emission
+      self._tau[emission] = expectation/expected_ycirc[y]
+
   """ Train the HMM using EM to estimate sigma and tau distributions.
         start_distribution: tuple (sigma, tau) defaultdicts representing an
                             initial distribution (optional)
@@ -110,76 +181,17 @@ class HiddenDataHMM:
     if start_distribution:
       self._sigma, self._tau = start_distribution
 
-    iterations = 1
-    n_sentence = len(self._sentences)
-    while iterations <= self._ITER_CAP:
-      print "iteration %i" % iterations
-      expected_yy_ = np.zeros([self._numStates]*2) # E[n_{y,y'}|x]: (y,y')->float
-      expected_yx = defaultdict(float) # E[n_{y,x}|x]: (y,x)->float
-      expected_ycirc = np.zeros(self._numStates) # E[n_{y,\circ}|x]: y->float
+    i = 1
+    while i <= self._ITER_CAP:
+      print "iteration %i" % i
 
       # (E-step):
-      s = 1
-      for sentence in self._sentences:
-        print "- sentence: %i of %i \t\t (iteration %i/%i)" % (s, n_sentence, iterations, self._ITER_CAP)
-        s+=1
-
-        n = len(sentence)
-
-        ALPHA, BETA = 0, 1 # indices
-        alphaBetaMat = np.zeros([2, n, self._numStates]) # [alpha or beta][timestep][state] -> prob.
-
-        alphaBetaMat[ALPHA][0][self._STOPTAG] = 1.0
-        alphaBetaMat[BETA][n-1][self._STOPTAG] = 1.0
-
-        # iterate over sentence without initial STOP for alpha, last STOP for beta
-        # e.g. [STOP, "hello", "world", STOP]
-        # Calculate alpha and beta using our sigmas and taus
-        print "-- compute alpha and beta:"
-        alphas = alphaBetaMat[ALPHA,:,:]
-        betas = alphaBetaMat[BETA,:,:]
-
-        for i in xrange(1,n):
-          print "--- word %i" % i
-          j = n - i - 1
-          x_i = sentence[i]
-          x_j1 = sentence[j+1]
-          self._computeAlphasTimestep(alphas, i, x_i) # compute alphas for this timestep
-          self._computeBetasTimestep(betas, j, x_j1) # compute betas for this timestep
-
-        for i in xrange(1,n):
-          self._normaliseAlphaBeta(alphas[i], betas[i])
-
-        # Here we go again, now to calculate expectations
-        print "-- compute expectations:"
-        for i in xrange(0,n-1):
-          print "--- word %i" %i
-          x = sentence[i]
-          nextX = sentence[i+1]
-          for y in self._states:
-            alpha_y = alphas[i][y]
-            beta_y = betas[i][y]
-            totalProb = alphas[n-1][self._STOPTAG]
-            expOutputFreq = self._expEmissionFreq(alpha_y, beta_y, totalProb)
-            expected_yx[(y,x)] += expOutputFreq
-            expected_ycirc[y] += expOutputFreq
-
-            for y_ in self._states: # iterate over y' for E[n_{y,y'}|x]
-              beta_y_ = betas[i+1][y_]
-              sigma = self._sigma[y,y_]
-              tau = self._tau[(y_,nextX)]
-              expected_yy_[y,y_] += self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
+      e_yx, e_yy_, e_ycirc = self._do_EStep(i)
 
       # (M-step): update sigma and tau
-      for y in self._states:
-        for yprime in self._states:
-          self._sigma[y,yprime] = expected_yy_[y,yprime]/expected_ycirc[y]
+      self._do_MStep(e_yx, e_yy_, e_ycirc)
 
-      for emission,expectation in expected_yx.iteritems():
-        y, _ = emission
-        self._tau[emission] = expectation/expected_ycirc[y]
-
-      iterations += 1 # increment iterations count
+      i += 1 # increment iterations count
 
     print self._sigma
 
@@ -190,7 +202,7 @@ class HiddenDataHMM:
 
   def getTau(self, y, x):
     y = self._labelHash[y]
-    return self._tau[(y,hash(x))]
+    return self._tau[(y,x)]
 
   def getState(self, tag): # Return the internal state value corresponding to the given POS tag
     return self._labelHash[tag]

@@ -1,7 +1,7 @@
 from collections import defaultdict
-import random
 import itertools
 import numpy as np
+import sys
 
 STOP = "**@sToP@**" # The stop symbol
 
@@ -32,11 +32,9 @@ class HiddenDataHMM:
 
     self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)
 
-    random.seed()
-
   """ Custom smoothing function for the defaultdicts _sigma and _tau """
   def _paramSmooth(pair):
-    return 0.01*random.uniform(0.95,1.05)
+    return 0.01*np.random.uniform(0.95,1.05)
 
   """ Compute alphas for this timestep.
         alpha: n x m slice of the alphaBetaMat (n words by m states)
@@ -125,25 +123,30 @@ class HiddenDataHMM:
       # iterate over sentence without initial STOP for alpha, last STOP for beta
       # e.g. [STOP, "hello", "world", STOP]
       # Calculate alpha and beta using our sigmas and taus
-      print "-- compute alpha and beta:"
+      print "-- compute alpha and beta",
       alphas = alphaBetaMat[ALPHA,:,:]
       betas = alphaBetaMat[BETA,:,:]
 
+      #sys.stdout.write("--- word ")
       for i in xrange(1,n):
-        print "--- word %i" % i
+        sys.stdout.write(".")
+        sys.stdout.flush()
         j = n - i - 1
         x_i = sentence[i]
         x_j1 = sentence[j+1]
         self._computeAlphasTimestep(alphas, i, x_i) # compute alphas for this timestep
         self._computeBetasTimestep(betas, j, x_j1) # compute betas for this timestep
+      sys.stdout.write("done\n")
 
       for i in xrange(1,n):
         self._normaliseAlphaBeta(alphas[i], betas[i])
 
       # Here we go again, now to calculate expectations
-      print "-- compute expectations:"
+      print "-- compute expectations",
+      #sys.stdout.write("--- word ")
       for i in xrange(0,n-1):
-        print "--- word %i" %i
+        sys.stdout.write(".")
+        sys.stdout.flush()
         x = sentence[i]
         nextX = sentence[i+1]
         for y in self._states:
@@ -159,6 +162,7 @@ class HiddenDataHMM:
             sigma = self._sigma[y,y_]
             tau = self._tau[(y_,nextX)]
             expected_yy_[y,y_] += self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
+      sys.stdout.write("done\n")
 
     return (expected_yx, expected_yy_, expected_ycirc) # return expectations
 

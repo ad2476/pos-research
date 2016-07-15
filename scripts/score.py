@@ -10,10 +10,10 @@ def calculateAccuracy(filePreparser, correctFile, estimateFile):
   numCorrect = 0
   total = 0
   for correct,estimate in itertools.izip(correctFile, estimateFile):
-    #correct = correct.split()
-    #estimate = estimate.split()
     _, correctTags = filePreparser([correct]).parseWordsTags()
     _, estimateTags = filePreparser([estimate]).parseWordsTags()
+    correctTags = correctTags[0]
+    estimateTags = estimateTags[0]
     total += len(estimateTags)
     if len(correctTags) == len(estimateTags):
       for i in xrange(0, len(correctTags)):
@@ -34,8 +34,8 @@ if __name__ == '__main__':
   testFile = open(sys.argv[1], 'r')
   outputFile = open(sys.argv[2], 'r')
 
-  accuracy = calculateAccuracy(preparser.SanskritJNUParser, testFile, outputFile)
-  #accuracy = calculateAccuracy(preparser.EnglishWSJParser, testFile, outputFile)
+  #accuracy = calculateAccuracy(preparser.SanskritJNUParser, testFile, outputFile)
+  accuracy = calculateAccuracy(preparser.EnglishWSJParser, testFile, outputFile)
 
   print accuracy
 

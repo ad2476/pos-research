@@ -1,12 +1,14 @@
 from collections import defaultdict
 import itertools
 import numpy as np
+cimport numpy as np
 import sys
 
 STOP = "**@sToP@**" # The stop symbol
 
 """ A Hidden Markov Model constructed from hidden (unlabeled) data """
-class HiddenDataHMM:
+cdef class HiddenDataHMM:
+  cdef public _ITER_CAP, _sentences, _numStates, _states, _labelHash, _STOPTAG, _sigma, _tau, unkCount
 
   """ Construct the HMM object using a list of outputs and a set of posLabels. """
   def __init__(self, outputs, posLabels, labelHash=None):
@@ -15,7 +17,8 @@ class HiddenDataHMM:
     #self._sentences = [[hash(x) for x in sentence] for sentence in outputs]
     self._sentences = outputs
     self._numStates = len(posLabels)
-    self._states = xrange(0,self._numStates) # faster np.array indexing
+    cdef np.ndarray[np.int_t, ndim=1] _states = np.array(xrange(0, self._numStates))
+    self._states = _states # faster np.array indexing
 
     if not labelHash:
       self._labelHash = {} # map actual label to its internal index number
@@ -33,7 +36,7 @@ class HiddenDataHMM:
     self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)
 
   """ Custom smoothing function for the defaultdicts _sigma and _tau """
-  def _paramSmooth(pair):
+  def _paramSmooth(key):
     return 0.01*np.random.uniform(0.95,1.05)
 
   """ Compute alphas for this timestep.
@@ -41,7 +44,9 @@ class HiddenDataHMM:
         x: the output at this timestep
       Return: Nothing, calculated in place
   """
-  def _computeAlphasTimestep(self, alpha, i, x):
+  cdef void _computeAlphasTimestep(self, np.ndarray[np.float_t, ndim=2] alpha, int i, str x):
+    cdef double val
+    cdef int y, yprime
     for y in self._states:
       val = 0.0
       for yprime in self._states:
@@ -53,7 +58,9 @@ class HiddenDataHMM:
         xNext: the output at next timestep
       Return: Nothing, calculated in place
   """
-  def _computeBetasTimestep(self, beta, i, xNext):
+  cdef void _computeBetasTimestep(self, np.ndarray[np.float_t, ndim=2] beta, int i, str xNext):
+    cdef double val
+    cdef int y, yprime
     for y in self._states:
       val = 0.0
       for yprime in self._states:
@@ -61,34 +68,18 @@ class HiddenDataHMM:
       beta[i][y] = val
 
   """ Normalise alpha_i and beta_i (both row vectors) """
-  def _normaliseAlphaBeta(self, alpha_i, beta_i):
+  cdef void _normaliseAlphaBeta(self, np.ndarray[np.float_t, ndim=1] alpha_i, np.ndarray[np.float_t, ndim=1] beta_i):
     normFactor = np.sum(alpha_i)
     alpha_i = alpha_i/normFactor
     beta_i = beta_i/normFactor
-
-  """ Not used rn, not compat with np structure!! """
-  def _forwardBackward(self, prevFwdBwd, x_i, x_j1):
-    prevAlpha, prevBeta = prevFwdBwd
-    alpha, beta = np.zeros(self._numStates), np.zeros(self._numStates)
-
-    for y in self._states:
-      alpha_val = 0
-      beta_val = 0
-      for yprime in self._states:
-        alpha_val += prevAlpha[yprime]*self._sigma[(yprime,y)]
-        beta_val += prevBeta[yprime]*self._sigma[(y,yprime)]*self._tau[(yprime,x_j1)]
-      alpha[y] = alpha_val*self._tau[(y,x_i)]
-      beta[y] = beta_val
-
-    return (alpha, beta)
 
   """ Compute E[n_{i,y,x}|x].
         alpha_y: alpha_y(i)
         beta_y: beta_y(i)
         totalProb: alpha_STOP(n)
   """
-  def _expEmissionFreq(self, alpha_y, beta_y, totalProb):
-    return float(alpha_y*beta_y)/totalProb
+  cdef double _expEmissionFreq(self, double alpha_y, double beta_y, double totalProb):
+    return alpha_y*beta_y/totalProb
 
   """ Compute E[N_{i,y,y'}|x].
         alpha_y: alpha_y(i)
@@ -97,17 +88,25 @@ class HiddenDataHMM:
         tau: tau_{y',x_{i+1}}
         totalProb: alpha_STOP(n)
   """
-  def _expTransitionFreq(self, alpha_y, beta_yprime, sigma, tau, totalProb):
-    return float(alpha_y*sigma*tau*beta_yprime)/totalProb
+  cdef double _expTransitionFreq(self, double alpha_y, double beta_yprime, double sigma, double tau, double totalProb):
+    return alpha_y*sigma*tau*beta_yprime/totalProb
 
   """ Perform the E-Step of EM. Return the expectations. """
-  def _do_EStep(self, iteration):
+  cdef tuple _do_EStep(self, int iteration):
+    # s: sentence, n_sentence: # sentences, n: len(sentence), ALPHA=0, BETA=1, j:beta index
+    cdef int s, n_sentence, n, ALPHA, BETA, i, j
+    cdef np.ndarray alphaBetaMat
+    cdef np.ndarray[np.float_t, ndim=1] expected_ycirc
+    cdef np.ndarray[np.float_t, ndim=2] alphas, betas, expected_yy_
+    cdef str x_i, x_i1, x_j1
+    cdef double alpha_y, beta_y, totalProb, sigma, tau, expOutputFreq
+
     expected_yy_ = np.zeros([self._numStates]*2) # E[n_{y,y'}|x]: (y,y')->float
     expected_yx = defaultdict(float) # E[n_{y,x}|x]: (y,x)->float
     expected_ycirc = np.zeros(self._numStates) # E[n_{y,\circ}|x]: y->float
 
     s = 1
-    n_sentence = len(self._sentences)
+    n_sentence = len(self._sentences) 
     for sentence in self._sentences:
       print "- sentence: %i of %i \t\t (iteration %i/%i)" % (s, n_sentence, iteration, self._ITER_CAP)
       s+=1
@@ -127,7 +126,6 @@ class HiddenDataHMM:
       alphas = alphaBetaMat[ALPHA,:,:]
       betas = alphaBetaMat[BETA,:,:]
 
-      #sys.stdout.write("--- word ")
       for i in xrange(1,n):
         sys.stdout.write(".")
         sys.stdout.flush()
@@ -144,30 +142,30 @@ class HiddenDataHMM:
       # Here we go again, now to calculate expectations
       print "-- compute expectations",
       #sys.stdout.write("--- word ")
-      for i in xrange(0,n-1):
+      for i in xrange(n-1):
         sys.stdout.write(".")
         sys.stdout.flush()
-        x = sentence[i]
-        nextX = sentence[i+1]
+        x_i = sentence[i]
+        x_i1 = sentence[i+1]
         for y in self._states:
           alpha_y = alphas[i][y]
           beta_y = betas[i][y]
           totalProb = alphas[n-1][self._STOPTAG]
           expOutputFreq = self._expEmissionFreq(alpha_y, beta_y, totalProb)
-          expected_yx[(y,x)] += expOutputFreq
+          expected_yx[(y,x_i)] += expOutputFreq
           expected_ycirc[y] += expOutputFreq
 
           for y_ in self._states: # iterate over y' for E[n_{y,y'}|x]
             beta_y_ = betas[i+1][y_]
             sigma = self._sigma[y,y_]
-            tau = self._tau[(y_,nextX)]
+            tau = self._tau[(y_,x_i1)]
             expected_yy_[y,y_] += self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
       sys.stdout.write("done\n")
 
     return (expected_yx, expected_yy_, expected_ycirc) # return expectations
 
   """ Perform the M-Step of EM. Update sigma and tau mappings using expectations. """ 
-  def _do_MStep(self, expected_yx, expected_yy_, expected_ycirc):
+  cdef void _do_MStep(self, expected_yx, np.ndarray[np.float_t, ndim=2] expected_yy_, np.ndarray[np.float_t, ndim=1] expected_ycirc):
     for y in self._states:
       for yprime in self._states:
         self._sigma[y,yprime] = expected_yy_[y,yprime]/expected_ycirc[y]
@@ -176,17 +174,15 @@ class HiddenDataHMM:
       y, _ = emission
       self._tau[emission] = expectation/expected_ycirc[y]
 
-  """ Train the HMM using EM to estimate sigma and tau distributions.
-        start_distribution: tuple (sigma, tau) defaultdicts representing an
-                            initial distribution (optional)
-  """
-  def train(self, start_distribution=None):
+  cdef void _train(self, start_distribution, int ITER_CAP):
     print "Beginning train iterations (EM)..."
     if start_distribution:
       self._sigma, self._tau = start_distribution
 
-    i = 1
-    while i <= self._ITER_CAP:
+    cdef int i = 1
+    cdef np.ndarray[np.float_t, ndim=2] e_yy_
+    cdef np.ndarray[np.float_t, ndim=1] e_ycirc
+    while i <= ITER_CAP:
       print "iteration %i" % i
 
       # (E-step):
@@ -197,6 +193,13 @@ class HiddenDataHMM:
 
       i += 1 # increment iterations count
 
+
+  """ Train the HMM using EM to estimate sigma and tau distributions.
+        start_distribution: tuple (sigma, tau) defaultdicts representing an
+                            initial distribution (optional)
+  """
+  def train(self, start_distribution=None):
+    self._train(start_distribution, self._ITER_CAP)
     print self._sigma
 
   def getSigma(self, y, yprime):

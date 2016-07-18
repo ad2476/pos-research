@@ -16,8 +16,6 @@ The `master` branch of this repository represents the most stable iteration of t
 
 The branch `em-devel` contains more current development on implementing EM (Baum-Welch) for HMMs.
 
-The branch `cython-optim` is most current (and least stable), ahead of `em-devel` in which the HMM module is being re-implemented in Cython for optimisation gains.
-
 ## Running the train/test/score routine of the tagger:
 
 Two scripts: `tag` and `better_tag`. The former does regular tagging, the latter will replace all words with count of 1 in the training corpus with `*UNK*`. `better_tag` is recommended for higher accuracy.

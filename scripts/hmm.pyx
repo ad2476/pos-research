@@ -14,7 +14,7 @@ cdef class HiddenDataHMM:
 
   """ Construct the HMM object using a list of outputs and a set of posLabels. """
   def __init__(self, outputs, posLabels, labelHash=None):
-    self._ITER_CAP = 10
+    self._ITER_CAP = 1
 
     # hash to create an array of ints
     self._sentences = [[hash(x) for x in sentence] for sentence in outputs]

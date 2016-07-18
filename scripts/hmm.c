@@ -2086,7 +2086,7 @@ static PyObject *__pyx_codeobj__34;
  * 
  *   """ Construct the HMM object using a list of outputs and a set of posLabels. """
  *   def __init__(self, outputs, posLabels, labelHash=None):             # <<<<<<<<<<<<<<
- *     self._ITER_CAP = 10
+ *     self._ITER_CAP = 1
  * 
  */
 
@@ -2193,11 +2193,11 @@ static int __pyx_pf_3hmm_13HiddenDataHMM___init__(struct __pyx_obj_3hmm_HiddenDa
   /* "hmm.pyx":17
  *   """ Construct the HMM object using a list of outputs and a set of posLabels. """
  *   def __init__(self, outputs, posLabels, labelHash=None):
- *     self._ITER_CAP = 10             # <<<<<<<<<<<<<<
+ *     self._ITER_CAP = 1             # <<<<<<<<<<<<<<
  * 
  *     # hash to create an array of ints
  */
-  __pyx_v_self->_ITER_CAP = 10;
+  __pyx_v_self->_ITER_CAP = 1;
 
   /* "hmm.pyx":20
  * 
@@ -2664,7 +2664,7 @@ static int __pyx_pf_3hmm_13HiddenDataHMM___init__(struct __pyx_obj_3hmm_HiddenDa
  * 
  *   """ Construct the HMM object using a list of outputs and a set of posLabels. """
  *   def __init__(self, outputs, posLabels, labelHash=None):             # <<<<<<<<<<<<<<
- *     self._ITER_CAP = 10
+ *     self._ITER_CAP = 1
  * 
  */
 

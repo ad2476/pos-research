@@ -34,8 +34,8 @@ if __name__ == '__main__':
   testFile = open(sys.argv[1], 'r')
   outputFile = open(sys.argv[2], 'r')
 
-  #accuracy = calculateAccuracy(preparser.SanskritJNUParser, testFile, outputFile)
-  accuracy = calculateAccuracy(preparser.EnglishWSJParser, testFile, outputFile)
+  accuracy = calculateAccuracy(preparser.SanskritJNUParser, testFile, outputFile)
+  #accuracy = calculateAccuracy(preparser.EnglishWSJParser, testFile, outputFile)
 
   print accuracy
 

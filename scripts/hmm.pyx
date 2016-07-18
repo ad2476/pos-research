@@ -14,7 +14,7 @@ cdef class HiddenDataHMM:
 
   """ Construct the HMM object using a list of outputs and a set of posLabels. """
   def __init__(self, outputs, posLabels, labelHash=None):
-    self._ITER_CAP = 1
+    self._ITER_CAP = 10
 
     # hash to create an array of ints
     self._sentences = [[hash(x) for x in sentence] for sentence in outputs]
@@ -122,29 +122,25 @@ cdef class HiddenDataHMM:
       # iterate over sentence without initial STOP for alpha, last STOP for beta
       # e.g. [STOP, "hello", "world", STOP]
       # Calculate alpha and beta using our sigmas and taus
-      print "-- compute alpha and beta",
+      #print "-- compute alpha and beta",
       alphas = alphaBetaMat[ALPHA,:,:]
       betas = alphaBetaMat[BETA,:,:]
 
       for i in xrange(1,n):
-        sys.stdout.write(".")
-        sys.stdout.flush()
+        #sys.stdout.write(".")
         j = n - i - 1
         x_i = sentence[i]
         x_j1 = sentence[j+1]
         self._computeAlphasTimestep(sigmaMat, alphas, i, x_i) # compute alphas for this timestep
         self._computeBetasTimestep(sigmaMat, betas, j, x_j1) # compute betas for this timestep
-      sys.stdout.write("done\n")
 
       for i in xrange(1,n):
         self._normaliseAlphaBeta(alphas[i], betas[i])
 
       # Here we go again, now to calculate expectations
-      print "-- compute expectations",
-      #sys.stdout.write("--- word ")
+      #print "-- compute expectations",
       for i in xrange(n-1):
-        sys.stdout.write(".")
-        sys.stdout.flush()
+        #sys.stdout.write(".")
         x_i = sentence[i]
         x_i1 = sentence[i+1]
         for y in range(0,self._numStates):
@@ -160,7 +156,7 @@ cdef class HiddenDataHMM:
             sigma = sigmaMat[y,y_]
             tau = self._tau[(y_,x_i1)]
             expected_yy_[y,y_] += self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
-      sys.stdout.write("done\n")
+      #sys.stdout.write("done\n")
 
     return (expected_yx, expected_yy_, expected_ycirc) # return expectations
 

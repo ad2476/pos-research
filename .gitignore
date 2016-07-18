@@ -7,3 +7,5 @@ tagged*
 debug.txt
 
 debug/*
+
+*.so

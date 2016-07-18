@@ -8,17 +8,18 @@ STOP = "**@sToP@**" # The stop symbol
 
 """ A Hidden Markov Model constructed from hidden (unlabeled) data """
 cdef class HiddenDataHMM:
-  cdef public _ITER_CAP, _sentences, _numStates, _states, _labelHash, _STOPTAG, _sigma, _tau, unkCount
+  cdef public _sentences, _states, _labelHash, _sigma, _tau
+  cdef int _ITER_CAP, _numStates
+  cdef public int unkCount, _STOPTAG
 
   """ Construct the HMM object using a list of outputs and a set of posLabels. """
   def __init__(self, outputs, posLabels, labelHash=None):
     self._ITER_CAP = 1
 
-    #self._sentences = [[hash(x) for x in sentence] for sentence in outputs]
-    self._sentences = outputs
+    # hash to create an array of ints
+    self._sentences = [[hash(x) for x in sentence] for sentence in outputs]
     self._numStates = len(posLabels)
-    cdef np.ndarray[np.int_t, ndim=1] _states = np.array(xrange(0, self._numStates))
-    self._states = _states # faster np.array indexing
+    self._states = range(0, self._numStates) # faster np.array indexing
 
     if not labelHash:
       self._labelHash = {} # map actual label to its internal index number
@@ -44,31 +45,30 @@ cdef class HiddenDataHMM:
         x: the output at this timestep
       Return: Nothing, calculated in place
   """
-  cdef void _computeAlphasTimestep(self, np.ndarray[np.float_t, ndim=2] alpha, int i, str x):
+  cdef void _computeAlphasTimestep(self, double[:,:] sigma, double[:,:] alpha, int i, long x):
     cdef double val
-    cdef int y, yprime
-    for y in self._states:
+    for y in range(0, self._numStates):
       val = 0.0
-      for yprime in self._states:
-        val += alpha[i-1][yprime]*self._sigma[yprime,y]
-      alpha[i][y] = val*self._tau[(y,x)]
+      for yprime in range(0, self._numStates):
+        val += alpha[(i-1), yprime]*sigma[yprime,y]
+      alpha[i,y] = val*self._tau[(y,x)]
 
   """ Compute alphas for this timestep.
         beta: n x m slice of the alphaBetaMat (n words by m states)
         xNext: the output at next timestep
       Return: Nothing, calculated in place
   """
-  cdef void _computeBetasTimestep(self, np.ndarray[np.float_t, ndim=2] beta, int i, str xNext):
+  cdef void _computeBetasTimestep(self, double[:,:] sigma, double[:,:] beta, int i, long xNext):
     cdef double val
     cdef int y, yprime
-    for y in self._states:
+    for y in range(0, self._numStates):
       val = 0.0
-      for yprime in self._states:
-        val += beta[i+1][yprime]*self._sigma[y,yprime]*self._tau[(yprime,xNext)]
-      beta[i][y] = val
+      for yprime in range(0, self._numStates):
+        val += beta[(i+1),yprime]*sigma[y,yprime]*self._tau[(yprime,xNext)]
+      beta[i,y] = val
 
   """ Normalise alpha_i and beta_i (both row vectors) """
-  cdef void _normaliseAlphaBeta(self, np.ndarray[np.float_t, ndim=1] alpha_i, np.ndarray[np.float_t, ndim=1] beta_i):
+  cdef void _normaliseAlphaBeta(self, np.ndarray[double] alpha_i, np.ndarray[double] beta_i):
     normFactor = np.sum(alpha_i)
     alpha_i = alpha_i/normFactor
     beta_i = beta_i/normFactor
@@ -95,15 +95,17 @@ cdef class HiddenDataHMM:
   cdef tuple _do_EStep(self, int iteration):
     # s: sentence, n_sentence: # sentences, n: len(sentence), ALPHA=0, BETA=1, j:beta index
     cdef int s, n_sentence, n, ALPHA, BETA, i, j
-    cdef np.ndarray alphaBetaMat
-    cdef np.ndarray[np.float_t, ndim=1] expected_ycirc
-    cdef np.ndarray[np.float_t, ndim=2] alphas, betas, expected_yy_
-    cdef str x_i, x_i1, x_j1
+    cdef np.ndarray[double, ndim=2] alphas, betas
+    cdef np.ndarray[double, ndim=3] alphaBetaMat
+    cdef long x_i, x_i1, x_j1
+    cdef int STOPTAGIDX = self._STOPTAG
     cdef double alpha_y, beta_y, totalProb, sigma, tau, expOutputFreq
 
-    expected_yy_ = np.zeros([self._numStates]*2) # E[n_{y,y'}|x]: (y,y')->float
+    cdef double[:,:] sigmaMat = self._sigma # memoryview on numpy array
+    cdef double[:,:] expected_yy_ = np.zeros([self._numStates]*2) # E[n_{y,y'}|x]: (y,y')->float
     expected_yx = defaultdict(float) # E[n_{y,x}|x]: (y,x)->float
-    expected_ycirc = np.zeros(self._numStates) # E[n_{y,\circ}|x]: y->float
+    cdef double[:] expected_ycirc = np.zeros(self._numStates) # E[n_{y,\circ}|x]: y->float
+    ALPHA, BETA = 0, 1 # indices
 
     s = 1
     n_sentence = len(self._sentences) 
@@ -113,11 +115,9 @@ cdef class HiddenDataHMM:
 
       n = len(sentence)
 
-      ALPHA, BETA = 0, 1 # indices
       alphaBetaMat = np.zeros([2, n, self._numStates]) # [alpha or beta][timestep][state] -> prob.
-
-      alphaBetaMat[ALPHA][0][self._STOPTAG] = 1.0
-      alphaBetaMat[BETA][n-1][self._STOPTAG] = 1.0
+      alphaBetaMat[ALPHA,0,STOPTAGIDX] = 1.0
+      alphaBetaMat[BETA,(n-1),STOPTAGIDX] = 1.0
 
       # iterate over sentence without initial STOP for alpha, last STOP for beta
       # e.g. [STOP, "hello", "world", STOP]
@@ -132,8 +132,8 @@ cdef class HiddenDataHMM:
         j = n - i - 1
         x_i = sentence[i]
         x_j1 = sentence[j+1]
-        self._computeAlphasTimestep(alphas, i, x_i) # compute alphas for this timestep
-        self._computeBetasTimestep(betas, j, x_j1) # compute betas for this timestep
+        self._computeAlphasTimestep(sigmaMat, alphas, i, x_i) # compute alphas for this timestep
+        self._computeBetasTimestep(sigmaMat, betas, j, x_j1) # compute betas for this timestep
       sys.stdout.write("done\n")
 
       for i in xrange(1,n):
@@ -147,17 +147,17 @@ cdef class HiddenDataHMM:
         sys.stdout.flush()
         x_i = sentence[i]
         x_i1 = sentence[i+1]
-        for y in self._states:
-          alpha_y = alphas[i][y]
-          beta_y = betas[i][y]
-          totalProb = alphas[n-1][self._STOPTAG]
+        for y in range(0,self._numStates):
+          alpha_y = alphas[i,y]
+          beta_y = betas[i,y]
+          totalProb = alphas[(n-1),STOPTAGIDX]
           expOutputFreq = self._expEmissionFreq(alpha_y, beta_y, totalProb)
           expected_yx[(y,x_i)] += expOutputFreq
           expected_ycirc[y] += expOutputFreq
 
-          for y_ in self._states: # iterate over y' for E[n_{y,y'}|x]
-            beta_y_ = betas[i+1][y_]
-            sigma = self._sigma[y,y_]
+          for y_ in range(0,self._numStates): # iterate over y' for E[n_{y,y'}|x]
+            beta_y_ = betas[(i+1),y_]
+            sigma = sigmaMat[y,y_]
             tau = self._tau[(y_,x_i1)]
             expected_yy_[y,y_] += self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
       sys.stdout.write("done\n")
@@ -165,10 +165,12 @@ cdef class HiddenDataHMM:
     return (expected_yx, expected_yy_, expected_ycirc) # return expectations
 
   """ Perform the M-Step of EM. Update sigma and tau mappings using expectations. """ 
-  cdef void _do_MStep(self, expected_yx, np.ndarray[np.float_t, ndim=2] expected_yy_, np.ndarray[np.float_t, ndim=1] expected_ycirc):
-    for y in self._states:
-      for yprime in self._states:
-        self._sigma[y,yprime] = expected_yy_[y,yprime]/expected_ycirc[y]
+  cdef void _do_MStep(self, expected_yx, double[:,:] expected_yy_, double[:] expected_ycirc):
+    cdef double[:,:] sigmaMat = self._sigma # memoryview on numpy array
+    cdef int y, yprime
+    for y in range(0,self._numStates):
+      for yprime in range(0,self._numStates):
+        sigmaMat[y,yprime] = expected_yy_[y,yprime]/expected_ycirc[y]
 
     for emission,expectation in expected_yx.iteritems():
       y, _ = emission
@@ -180,8 +182,8 @@ cdef class HiddenDataHMM:
       self._sigma, self._tau = start_distribution
 
     cdef int i = 1
-    cdef np.ndarray[np.float_t, ndim=2] e_yy_
-    cdef np.ndarray[np.float_t, ndim=1] e_ycirc
+    cdef double[:,:] e_yy_
+    cdef double[:] e_ycirc
     while i <= ITER_CAP:
       print "iteration %i" % i
 
@@ -192,7 +194,6 @@ cdef class HiddenDataHMM:
       self._do_MStep(e_yx, e_yy_, e_ycirc)
 
       i += 1 # increment iterations count
-
 
   """ Train the HMM using EM to estimate sigma and tau distributions.
         start_distribution: tuple (sigma, tau) defaultdicts representing an
@@ -209,6 +210,7 @@ cdef class HiddenDataHMM:
 
   def getTau(self, y, x):
     y = self._labelHash[y]
+    x = hash(x)
     return self._tau[(y,x)]
 
   def getState(self, tag): # Return the internal state value corresponding to the given POS tag

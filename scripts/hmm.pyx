@@ -14,7 +14,7 @@ cdef class HiddenDataHMM:
 
   """ Construct the HMM object using a list of outputs and a set of posLabels. """
   def __init__(self, outputs, posLabels, labelHash=None):
-    self._ITER_CAP = 1
+    self._ITER_CAP = 2
 
     # hash to create an array of ints
     self._sentences = [[hash(x) for x in sentence] for sentence in outputs]
@@ -31,7 +31,8 @@ cdef class HiddenDataHMM:
 
     self._STOPTAG = self._labelHash[STOP] # which one is the stop tag?
 
-    self._sigma = np.full([self._numStates]*2, 0.01)*np.random.uniform(0.95,1.05) # [y,y']->prob
+    randMat = np.random.uniform(0.9,1.1,[self._numStates]*2)
+    self._sigma = np.full([self._numStates]*2, 0.5)*randMat # [y,y']->prob
     self._tau = defaultdict(self._paramSmooth)
 
     self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)

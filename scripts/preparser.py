@@ -32,7 +32,7 @@ class AbstractPreparser:
     words = []
     for line in self._rawdata:
       line = "%s %s %s" % (STOP, line, STOP)
-      words.extend(line.split())
+      words.append(line.split())
 
     return words
 
@@ -78,6 +78,15 @@ class SanskritJNUParser(AbstractPreparser):
     #  match at least 0 times,lazy, on a group consisting of:
     #   not whitespace, not a ']' char
     return re.findall(r"([^\s\]]*?)\[", line)
+
+  def writeCorpusWithoutTags(self, out):
+    f = open(out, 'w')
+    for line in self._rawdata:
+      words = self.getSentenceWords(line)
+      for word in words:
+        f.write("%s "%word)
+      f.write("\n")
+    f.close()
 
   def getSentenceTags(self, line):
     # each line is formatted: "WORD[TAG] WORD[TAG] WORD[TAG]DANDA[TAG]\n"

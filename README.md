@@ -14,7 +14,7 @@ This research project aims to address a foremost issue with POS tagging for Sans
 
 The `master` branch of this repository represents the most stable iteration of the model. As of the latest update to this README, this is a (relatively) stable implementation of an HMM trained solely from visible data.
 
-The branch `em-devel` contains more current development on implementing EM (Baum-Welch) for HMMs.
+Other branches may be created as development continues to preserve master as stable and allow possibly unstable development on those branches.
 
 ## Running the train/test/score routine of the tagger:
 

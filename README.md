@@ -18,11 +18,7 @@ The branch `em-devel` contains more current development on implementing EM (Baum
 
 ## Running the train/test/score routine of the tagger:
 
-Two scripts: `tag` and `better_tag`. The former does regular tagging, the latter will replace all words with count of 1 in the training corpus with `*UNK*`. `better_tag` is recommended for higher accuracy.
+Train the tagger, and tag the words from the test corpus. Then, run the scorer on the tagged output, against the "gold" test corpus to evaluate word-level tag accuracy.
 
-To run on Sanskrit, make sure the tagger and scorer are using the `SanskritJNUParser` preparsing class. For English, on the Wall Street Journal corpora, use `EnglishWSJParser` class. This requires editing a single line in tagger.py and another single line in score.py.
-
-### Example: Running the script:
-
-`./better_tag data/wsj2-21.txt data/wsj22.txt data/tagged.txt` will train and evaluate the model on the Wall Street Journal corpus.
+For now, the best documentation on how to do this can be found by running `./tag --help` and `./score --help`. Documentation is a WIP.
 

@@ -66,15 +66,15 @@ def buildCorpus(files):
 
 """ Build a tagset, given relevant cmdline args """
 def buildTags(args):
-  if args.num_tags:
-    tags = range(0, args.num_tags)
-  else:
+  if args.tagfile:
     tagfile = open(args.tagfile, 'r') # this is a file with tags separated by whitespace
     tags = []
     for line in tagfile:
       tags.extend(line.split())
     tagfile.close()
     tags = set(tags)
+  else:
+    tags = range(0, args.num_tags)
 
   return tags
 

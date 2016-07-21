@@ -173,7 +173,7 @@ cdef class HiddenDataHMM:
       y, _ = emission
       self._tau[emission] = expectation/expected_ycirc[y]
 
-  cdef void _train(self, start_distribution, int ITER_CAP):
+  cdef void _train(self, int ITER_CAP, tuple start_distribution):
     print "Beginning train iterations (EM)..."
     if start_distribution:
       self._sigma, self._tau = start_distribution
@@ -194,10 +194,11 @@ cdef class HiddenDataHMM:
 
   """ Train the HMM using EM to estimate sigma and tau distributions.
         start_distribution: tuple (sigma, tau) defaultdicts representing an
-                            initial distribution (optional)
+                            initial distribution (or none to use random init)
   """
-  def train(self, start_distribution=None):
-    self._train(start_distribution, self._ITER_CAP)
+  def train(self, params):
+    iter_cap, start_distribution = params
+    self._train(iter_cap, start_distribution)
     print self._sigma
 
   def getSigma(self, y, yprime):
@@ -219,13 +220,13 @@ cdef class HiddenDataHMM:
 """ A Hidden Markov Model constructed from visible data """
 class VisibleDataHMM:
 
-  """ Construct the HMM object using the outputs and labels
-      better: True for better_tag, False for tag
+  """ Construct the HMM object using the outputs and labels (and wordcounts)
+      Pass a dict of word->count for *UNK* substitution in train()
   """
-  def __init__(self, outputs, labels, better):
+  def __init__(self, outputs, labels, counts):
     self._outputs = outputs # list of list of words
     self._labels = labels # list of list of states
-    self._better = better
+    self._counts = counts
 
     self.sigma = {}
     self.tau = {}
@@ -241,9 +242,9 @@ class VisibleDataHMM:
     self._alpha = 1 # add-alpha
 
   """ Train the HMM by building the sigma and tau mappings.
-      Pass this method a dict of word->count for *UNK* substitution
+        - params is a useless parameter, for conforming to the interface for HMMs
   """
-  def train(self, counts):
+  def train(self, params=None):
     self.n_yy_ = {} # n_y,y' (number of times y' follows y)
     self.n_ycirc = {} # n_y,o (number of times any label follows y)
     self.n_yx = {} # n_y,x (number of times label y labels output x)
@@ -257,7 +258,7 @@ class VisibleDataHMM:
         ytuple = (y,y_)
 
         x = words[i] # corresponding output
-        if counts[x] == 1 and self._better:
+        if self._counts[x] == 1:
           yunk = (y,"*UNK*")
           self.n_yx[yunk] = self.n_yx.get(yunk, 0) + 1
           self.xSet["*UNK*"] = True
@@ -283,12 +284,10 @@ class VisibleDataHMM:
   """ Return the tau_{y,x} for given y and x - or 0 if dne """
   def getTau(self, y, x):
     count = 0
-    if x in self.xSet and x is not "*UNK*":
+    if x in self.xSet:
       count = self.n_yx.get((y,x), 0)
-    elif self._better: # x is *UNK* and we're using better_tag
+    else: # x is *UNK*
       count = self.n_yx.get((y,"*UNK*"), 0)
-    else: # x is *UNK* and we're not using better_tag
-      count = 1 # tau_{y,*U*} = 1
 
     tau = count/float(self.n_ycirc[y])
     return tau

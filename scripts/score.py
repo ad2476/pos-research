@@ -1,42 +1,48 @@
 import sys
+import argparse
 import itertools
 import preparser
 
-def printUsage():
-  print "Usage: python score.py <correct> <tagger_output>"
+def parseProgramArgs():
+  parser = argparse.ArgumentParser(description="Score tagged output.")
+  parser.add_argument("gold", help="Gold (correct) output.")
+  parser.add_argument("tagged", help="Tagged output.")
+  parser.add_argument("--lang", choices=["EN", "SANS"], required=True,
+                      help="Select tagging language. Required.")
+
+  return parser.parse_args()
 
 def calculateAccuracy(filePreparser, correctFile, estimateFile):
   
-  numCorrect = 0
-  total = 0
+  numCorrect = 0.0
+  total = 0.0
   for correct,estimate in itertools.izip(correctFile, estimateFile):
-    _, correctTags = filePreparser([correct]).parseWordsTags()
-    _, estimateTags = filePreparser([estimate]).parseWordsTags()
-    correctTags = correctTags[0]
-    estimateTags = estimateTags[0]
+    correctTags = filePreparser.getSentenceTags(correct)
+    estimateTags = filePreparser.getSentenceTags(estimate)
     total += len(estimateTags)
     if len(correctTags) == len(estimateTags):
       for i in xrange(0, len(correctTags)):
         if correctTags[i] == estimateTags[i]:
-          numCorrect += 1
+          numCorrect += 1.0
 
-  if total == 0:
+  if total == 0.0:
     return 0.0
 
-  return numCorrect/float(total)
+  return numCorrect/total
 
 if __name__ == '__main__':
 
-  if len(sys.argv) != 3:
-    printUsage()
-    sys.exit(1)
+  args = parseProgramArgs()
 
-  testFile = open(sys.argv[1], 'r')
-  outputFile = open(sys.argv[2], 'r')
+  testFile = open(args.gold, 'r')
+  outputFile = open(args.tagged, 'r')
 
-  accuracy = calculateAccuracy(preparser.SanskritJNUParser, testFile, outputFile)
-  #accuracy = calculateAccuracy(preparser.EnglishWSJParser, testFile, outputFile)
+  if args.lang == "EN":
+    FilePreparser = preparser.EnglishWSJParser(None)
+  elif args.lang == "SANS":
+    FilePreparser = preparser.SanskritJNUParser(None)
 
+  accuracy = calculateAccuracy(FilePreparser, testFile, outputFile)
   print accuracy
 
   testFile.close()

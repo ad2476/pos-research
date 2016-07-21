@@ -3,38 +3,60 @@ import re
 import itertools
 from hmm import STOP
 
-""" This class will pre-parse POS-tagged files in the format of the WSJ data """
-class EnglishWSJParser:
+""" This class lays out the general interface for a preparser and implements some common
+    methods.
+"""
+class AbstractPreparser:
 
-  def __init__(self, inputData):
-    self._rawdata = inputData
-    self._stopPair = STOP + " " + STOP
+  def __init__(self):
+    raise NotImplementedError('Subclasses must override this method!')
 
-  """ Parse the outputs and tags into separate lists """
+  """ Parse the outputs and tags into separate lists. """
   def parseWordsTags(self):
     words = []
     tags = []
 
-    for line in self._rawdata:
-      line = "%s %s %s" % (self._stopPair, line, self._stopPair)
-      sentence = line.split()
-      words_i = []
-      tags_i = []
-      # i increments by 2 from 0 to len(sentence)
-      for i in xrange(0, len(sentence), 2):
-        word = sentence[i]
-        label = sentence[i+1]
+    try:
+      for line in self._rawdata:
+        line = "%s %s %s" % (self._stopPair, line, self._stopPair)
+        words.append(self.getSentenceWords(line))
+        tags.append(self.getSentenceTags(line))
 
-        words_i.append(word)
-        tags_i.append(label)
-
-      words.append(words_i)
-      tags.append(tags_i)
+    except IndexError:
+      return None
 
     return words,tags
 
-  def readTestSentence(self, line):
+  """ For use when just the words are desired from a corpus. Aka just tokenise the sentences."""
+  def parseWords(self):
+    words = []
+    for line in self._rawdata:
+      line = "%s %s %s" % (STOP, line, STOP)
+      words.extend(line.split())
+
+    return words
+
+  def getSentenceWords(self, line):
+    raise NotImplementedError('Subclasses must override this method!')
+  def getSentenceTags(self, line):
+    raise NotImplementedError('Subclasses must override this method!')
+  def formatOutput(self, words, tags):
+    raise NotImplementedError('Subclasses must override this method!')
+
+""" This class will pre-parse POS-tagged files in the format of the WSJ data """
+class EnglishWSJParser(AbstractPreparser):
+
+  """ - inputData: List of sentences in the corpus
+  """
+  def __init__(self, inputData):
+    self._rawdata = inputData
+    self._stopPair = STOP + " " + STOP
+
+  def getSentenceWords(self, line):
     return line.split()[::2]
+
+  def getSentenceTags(self, line):
+    return line.split()[1::2]
 
   def formatOutput(self, words, tags):
     output = ""
@@ -43,31 +65,27 @@ class EnglishWSJParser:
 
     return output
 
-class SanskritJNUParser:
+class SanskritJNUParser(AbstractPreparser):
   
   def __init__(self, inputData):
     self._rawdata = inputData
     self._stopPair = "%s[%s]" % (STOP, STOP)
 
-  def parseWordsTags(self):
-    words = []
-    tags = []
-
-    for line in self._rawdata:
-      line = "%s %s %s" % (self._stopPair, line, self._stopPair)
-      # each line is formatted: "WORD[TAG] WORD[TAG] WORD[TAG]DANDA[TAG]\n"
-      
-      # capturing group before a literal '[' char:
-      #  match at least 0 times,lazy, on a group consisting of:
-      #   not whitespace, not a ']' char
-      words.append(re.findall(r"([^\s\]]*?)\[", line))
-
-      tags.append(re.findall(r"\[(.*?)\]", line)) # find everything within brackets
-
-    return words,tags
-
-  def readTestSentence(self, line):
+  def getSentenceWords(self, line):
+    # each line is formatted: "WORD[TAG] WORD[TAG] WORD[TAG]DANDA[TAG]\n"
+    
+    # capturing group before a literal '[' char:
+    #  match at least 0 times,lazy, on a group consisting of:
+    #   not whitespace, not a ']' char
     return re.findall(r"([^\s\]]*?)\[", line)
+
+  def getSentenceTags(self, line):
+    # each line is formatted: "WORD[TAG] WORD[TAG] WORD[TAG]DANDA[TAG]\n"
+    
+    # capturing group before a literal '[' char:
+    #  match at least 0 times,lazy, on a group consisting of:
+    #   not whitespace, not a ']' char
+    return re.findall(r"\[(.*?)\]", line)
 
   def formatOutput(self, words, tags):
     n = len(words)

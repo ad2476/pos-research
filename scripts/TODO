@@ -1,5 +1,0 @@
-Need to come up with a good build system for Cython now... For now, compile the hmm module by:
-
-cython -a hmm.pyx # also outputs an html page showing python interactions
-gcc -shared -pthread -fPIC -fwrapv -O2 -Wall -fno-strict-aliasing -I/usr/include/python2.7 -o hmm.so hmm.c
-

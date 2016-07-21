@@ -1,72 +1,154 @@
 import sys
+import argparse
 import unigram
 import hmm
 import decoder
 import preparser
 
-better = "--better_tag"
+DFLT_ITER_CAP = 1
 
-def printUsage():
-    print "Tag the words in 'testfile' with their corresponding parts of speech."
-    print "Usage: python tagger.py <testfile> <trainfile> <outputfile> [mode]"
-    print "\tmode: --tag or --better_tag"
+def parseProgramArgs():
+  parser = argparse.ArgumentParser(description="HMM-based part-of-speech tagger. See README.md for detailed documentation")
+  group1 = parser.add_argument_group("Data", "Specify input data to the tagger.")
+  group1.add_argument("--train", nargs='+', required=True,
+                      help="Path(s) to training corpora. Format should match model type.")
+  group1.add_argument("--test", nargs='+', required=True,
+                      help="Path(s) to test corpora.")
+  group1.add_argument("--output", required=True, help="Destination path for tagged test output")
+  group1.add_argument("--extra", nargs='+', help="Path to supplementary unlabeled corpus. Required if using semi-supervised, ignored otherwise.")
+
+  group2 = parser.add_argument_group("Model types", "Define the model being used.")
+  group2.add_argument("--lang", choices=["EN", "SANS"], required=True,
+                      help="Select tagging language.")
+  group2.add_argument("--model", choices=["super", "unsuper", "semisuper"], required=True,
+                      help="Train HMM in supervised, unsupervised or semi-supervised fashion.")
+
+  group3 = parser.add_argument_group("Meta-parameters", "Tweak meta-parameters to the model.")
+  group3.add_argument("--iter", type=int, help="Specify number of iterations of EM (for semi- and unsupervised models). Omit for 1 iteration default.")
+  group3_mutex = group3.add_mutually_exclusive_group()
+  group3_mutex.add_argument("--tagfile", help="Path to file containing a tagset.")
+  group3_mutex.add_argument("-n", "--num_tags", type=int, default=1,
+                            help="Number of tags the unsupervised model should use.")
+
+  return parser.parse_args()
+
+""" Build unigram counts from a corpus, aka n_w(d)
+    Inputs:
+      - document: An input corpus to build counts for
+    Returns:
+      - A tuple of counts (str->int) aka n_w(d)
+"""
+def buildCounts(document):
+  counts = {} # map string -> int: aka n_w(d)
+
+  # Populate n_w(d) aka counts dict
+  n_o = 0
+  for line in document:
+    words = line
+    for word in words:
+      n = counts.get(word, 0) + 1
+      counts[word] = n
+      n_o += 1
+
+  return counts, n_o
+
+""" Given a list of filenames, concatenate contents into a list of sentences.
+    Each sentence is a string.
+"""
+def buildCorpus(files):
+  corpus = []
+  for fname in files:
+    f = open(fname, 'r')
+    corpus.extend([line for line in f])
+    f.close()
+
+  return corpus
+
+""" Build a tagset, given relevant cmdline args """
+def buildTags(args):
+  if args.num_tags:
+    tags = range(0, args.num_tags)
+  else:
+    tagfile = open(args.tagfile, 'r') # this is a file with tags separated by whitespace
+    tags = []
+    for line in tagfile:
+      tags.extend(line.split())
+    tagfile.close()
+    tags = set(tags)
+
+  return tags
 
 if __name__ == '__main__':
 
-  if len(sys.argv) != 5:
-    printUsage()
-    sys.exit(1)
+  args = parseProgramArgs()
+  iter_cap = args.iter or DFLT_ITER_CAP
 
-  trainFile = open(sys.argv[1], 'r')
-  testFile = open(sys.argv[2], 'r')
-  outFile = open(sys.argv[3], 'w')
+  trainData = buildCorpus(args.train)
+  testData = buildCorpus(args.test)
 
-  trainData = [line for line in trainFile]
-  testData = [line for line in testFile]
+  outFile = open(args.output, 'w')
 
-  mode = sys.argv[4]
+  # Determine which preparser to use (this can be extensible)
+  if args.lang == "EN":
+    FilePreparser = preparser.EnglishWSJParser
+  elif args.lang == "SANS":
+    FilePreparser = preparser.SanskritJNUParser
 
-  lm = unigram.UnigramLangmod(None, None) # We don't actually need this for langmod
+  # Set up models depending on the type:
+  if args.model == "super":
+    data = FilePreparser(trainData).parseWordsTags()
+    if data is None:
+      sys.stderr.write("Error parsing input: Bad format.\n")
+      sys.exit(1)
 
-  #FilePreparser = preparser.EnglishWSJParser(trainData)
-  FilePreparser = preparser.SanskritJNUParser(trainData)
+    words, tags = data
+    counts,_ = buildCounts(words) # Build word counts from the input
+    model = hmm.VisibleDataHMM(words, tags, counts)
+    params = None
+  elif args.model == "unsuper":
+    words = FilePreparser(trainData).parseWords()
 
-  data = None
-  try:
-    data = FilePreparser.parseWordsTags()
-  except IndexError:
-    print "Error parsing input: Bad format"
-    sys.exit(1)
+    counts,_ = buildCounts(words)
+    tagset = buildTags(args)
+    model = hmm.HiddenDataHMM(words, tagset)
+    params = (iter_cap, None)
+  else: # model is semi-supervised
+    data = FilePreparser(trainData).parseWordsTags()
+    if data is None:
+      sys.stderr.write("Error parsing input: Bad format.\n")
+      sys.exit(1)
 
-  words,tags = data
-  counts, _ = lm.buildCounts(words) # Build word counts from the input
-  try:
-    model = hmm.VisibleDataHMM(words, tags, mode == better) # feed data
-    model.train(counts) # actually build sigma and tau
-    
-    EMmodel = hmm.HiddenDataHMM(words, model.getLabels())
-    EMmodel.train()
+    words, tags = data
+    counts,_ = buildCounts(words)
+    visibleModel = hmm.VisibleDataHMM(words, tags, counts) # now we have a visible model
+    visibleModel.train() # build the counts from the visible model
 
-    W_size = len(counts) # unique word types
-    print str(W_size) + " unique words, " + str(len(model.getLabels())) + " labels"
+    params = (iter_cap, (visibleModel.sigma, visibleModel.tau))     
+    if not args.extra: # make sure the user has specified this option
+      sys.stderr.write("--extra must be specified if --model=semisuper\n")
+      sys.exit(1)
 
-    viterbi = decoder.ViterbiDecoder(EMmodel, counts)
+    unlabeledData = buildCorpus(args.extra)
+    extraWords = FilePreparser(unlabeledData).parseWords()
+    model = hmm.HiddenDataHMM(extraWords, visibleModel.getLabels()) # now we have a hidden model
 
-    # decode the test file:
-    for line in testData:
-      sentence = FilePreparser.readTestSentence(line)
-      yhat = viterbi.decode(sentence)
-      tagged = FilePreparser.formatOutput(sentence, yhat)
-      outFile.write(tagged+"\n")
+  model.train(params) # train our model with the given training parameters
 
-  except SyntaxError as e:
-    print e
-    sys.exit(1)
+  W_size = len(counts) # unique word types
+  #print str(W_size) + " unique words, " + str(len(model.getLabels())) + " labels"
 
-  _, testWordCount = lm.buildCounts(testData)
-  print float(model.unkCount)/testWordCount
+  viterbi = decoder.ViterbiDecoder(model, counts)
 
-  trainFile.close()
-  testFile.close()
+  # decode the test file:
+  prep = FilePreparser(testData)
+  for line in testData:
+    sentence = prep.getSentenceWords(line)
+    yhat = viterbi.decode(sentence)
+    tagged = prep.formatOutput(sentence, yhat)
+    outFile.write(tagged+"\n")
+
+  #_, testWordCount = buildCounts(testData)
+  #print float(model.unkCount)/testWordCount
+
   outFile.close()
 

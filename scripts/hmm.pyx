@@ -14,8 +14,6 @@ cdef class HiddenDataHMM:
 
   """ Construct the HMM object using a list of outputs and a set of posLabels. """
   def __init__(self, outputs, posLabels, labelHash=None):
-    self._ITER_CAP = 2
-
     # hash to create an array of ints
     self._sentences = [[hash(x) for x in sentence] for sentence in outputs]
     self._numStates = len(posLabels)
@@ -93,7 +91,7 @@ cdef class HiddenDataHMM:
     return alpha_y*sigma*tau*beta_yprime/totalProb
 
   """ Perform the E-Step of EM. Return the expectations. """
-  cdef tuple _do_EStep(self, int iteration):
+  cdef tuple _do_EStep(self, int iteration, int iter_cap):
     # s: sentence, n_sentence: # sentences, n: len(sentence), ALPHA=0, BETA=1, j:beta index
     cdef int s, n_sentence, n, ALPHA, BETA, i, j
     cdef np.ndarray[double, ndim=2] alphas, betas
@@ -111,7 +109,7 @@ cdef class HiddenDataHMM:
     s = 1
     n_sentence = len(self._sentences) 
     for sentence in self._sentences:
-      print "- sentence: %i of %i \t\t (iteration %i/%i)" % (s, n_sentence, iteration, self._ITER_CAP)
+      print "- sentence: %i of %i \t\t (iteration %i/%i)" % (s, n_sentence, iteration, iter_cap)
       s+=1
 
       n = len(sentence)
@@ -185,7 +183,7 @@ cdef class HiddenDataHMM:
       print "iteration %i" % i
 
       # (E-step):
-      e_yx, e_yy_, e_ycirc = self._do_EStep(i)
+      e_yx, e_yy_, e_ycirc = self._do_EStep(i, ITER_CAP)
 
       # (M-step): update sigma and tau
       self._do_MStep(e_yx, e_yy_, e_ycirc)

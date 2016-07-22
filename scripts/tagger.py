@@ -1,6 +1,5 @@
 import sys
 import argparse
-import unigram
 import hmm
 import decoder
 import preparser

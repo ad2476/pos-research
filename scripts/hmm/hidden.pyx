@@ -136,9 +136,9 @@ cdef class HiddenDataHMM:
 
       for i in xrange(0,n):
         self._normaliseAlphaBeta(alphas[i], betas[i])
-        if self._verifyProbs(alphas[i], betas[i], betas[0][STOPTAGIDX]) == 0:
-          sys.stderr.write("Probabilities not valid!\n")
-          return (None,None,None)
+        #if self._verifyProbs(alphas[i], betas[i], betas[0][STOPTAGIDX]) == 0:
+        #  sys.stderr.write("Probabilities not valid!\n")
+        #  return (None,None,None)
 
       # Here we go again, now to calculate expectations
       for i in xrange(n-1):

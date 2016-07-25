@@ -75,8 +75,7 @@ def buildTags(args):
     tagfile.close()
     tags = set(tags)
   else:
-    tags = range(0, args.num_tags)
-    hmm.STOP = 0
+    tags = set([str(i) for i in range(0, args.num_tags)])
 
   return tags
 

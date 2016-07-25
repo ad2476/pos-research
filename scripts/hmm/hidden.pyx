@@ -4,6 +4,7 @@ cimport numpy as np
 import sys
 
 from . import _common as common
+from . import STOP
 
 """ A Hidden Markov Model constructed from hidden (unlabeled) data """
 cdef class HiddenDataHMM:
@@ -20,18 +21,13 @@ cdef class HiddenDataHMM:
 
     self._labelHash = labelHash or common.makeLabelHash(posLabels)
 
-    self._STOPTAG = self._labelHash[common.STOP] # which one is the stop tag?
+    self._STOPTAG = self._labelHash[STOP] # which one is the stop tag?
 
     randMat = np.random.uniform(0.9,1.1,[self._numStates]*2)
     self._sigma = np.full([self._numStates]*2, 0.1)*randMat # [y,y']->prob
-    self._tau = defaultdict(self._paramSmooth)
+    self._tau = defaultdict(lambda: 0.01*np.random.uniform(0.95,1.05))
 
     self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)
-
-  """ Custom smoothing function for the defaultdicts _sigma and _tau """
-  @staticmethod
-  def _paramSmooth(key):
-    return 0.01*np.random.uniform(0.95,1.05)
 
   """ Compute alphas for this timestep.
         alpha: n x m slice of the alphaBetaMat (n words by m states)
@@ -137,11 +133,11 @@ cdef class HiddenDataHMM:
         self._computeAlphasTimestep(sigmaMat, alphas, i, x_i) # compute alphas for this timestep
         self._computeBetasTimestep(sigmaMat, betas, j, x_j1) # compute betas for this timestep
 
-      for i in xrange(1,n):
+      for i in xrange(0,n):
         self._normaliseAlphaBeta(alphas[i], betas[i])
-        #if self._verifyProbs == 0:
-        #  sys.stderr.write("Probabilities not valid!\n")
-        #  return (None,None,None)
+        if self._verifyProbs(alphas[i], betas[i], betas[0][STOPTAGIDX]) == 0:
+          sys.stderr.write("Probabilities not valid!\n")
+          return (None,None,None)
 
       # Here we go again, now to calculate expectations
       for i in xrange(n-1):

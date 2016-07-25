@@ -1,5 +1,7 @@
 import sys
 import argparse
+from collections import defaultdict
+
 import hmm
 import decoder
 import preparser
@@ -38,15 +40,15 @@ def parseProgramArgs():
       - A tuple of counts (str->int) aka n_w(d)
 """
 def buildCounts(document):
-  counts = {} # map string -> int: aka n_w(d)
+  counts = defaultdict(int) # map string -> int: aka n_w(d)
 
   # Populate n_w(d) aka counts dict
   n_o = 0
   for line in document:
     words = line
     for word in words:
-      n = counts.get(word, 0) + 1
-      counts[word] = n
+      word = hash(word)
+      counts[word] += 1
       n_o += 1
 
   return counts, n_o
@@ -74,6 +76,7 @@ def buildTags(args):
     tags = set(tags)
   else:
     tags = range(0, args.num_tags)
+    hmm.STOP = 0
 
   return tags
 

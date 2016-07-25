@@ -1,6 +1,6 @@
 # Hidden Markov Model decoders
 
-import hmm as HMM
+from hmm import STOP
 
 class ViterbiDecoder:
 
@@ -19,7 +19,7 @@ class ViterbiDecoder:
     n = len(sentence)
 
     prev_mu = 1.0
-    yprime = HMM.STOP
+    yprime = STOP
     states = self.hmm.getLabels()
     for i in xrange(0,n): # iterate over the sentence
       word = sentence[i]
@@ -31,7 +31,7 @@ class ViterbiDecoder:
       for y in states: # argmax over every possible state y
         _, maxmu = argmax
         mu = prev_mu*self.hmm.getSigma(yprime,y)*self.hmm.getTau(y,word)
-        #mu = self.hmm.n_yx.get((y,word), 0.0) # "stupid" decoder - most freq.
+        #mu = self.hmm.n_yx[(y,hash(word))] # "stupid" decoder - most freq.
 
         if mu >= maxmu:
           argmax = (y,mu)

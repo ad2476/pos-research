@@ -1,10 +1,9 @@
 from collections import defaultdict
-import itertools
 import numpy as np
 cimport numpy as np
 import sys
 
-STOP = "**@sToP@**" # The stop symbol
+from . import _common as common
 
 """ A Hidden Markov Model constructed from hidden (unlabeled) data """
 cdef class HiddenDataHMM:
@@ -19,23 +18,18 @@ cdef class HiddenDataHMM:
     self._numStates = len(posLabels)
     self._states = range(0, self._numStates) # faster np.array indexing
 
-    if not labelHash:
-      self._labelHash = {} # map actual label to its internal index number
-      for each in enumerate(posLabels):
-        i,y = each
-        self._labelHash[y] = i
-    else:
-      self._labelHash = labelHash
+    self._labelHash = labelHash or common.makeLabelHash(posLabels)
 
-    self._STOPTAG = self._labelHash[STOP] # which one is the stop tag?
+    self._STOPTAG = self._labelHash[common.STOP] # which one is the stop tag?
 
     randMat = np.random.uniform(0.9,1.1,[self._numStates]*2)
-    self._sigma = np.full([self._numStates]*2, 0.5)*randMat # [y,y']->prob
+    self._sigma = np.full([self._numStates]*2, 0.1)*randMat # [y,y']->prob
     self._tau = defaultdict(self._paramSmooth)
 
     self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)
 
   """ Custom smoothing function for the defaultdicts _sigma and _tau """
+  @staticmethod
   def _paramSmooth(key):
     return 0.01*np.random.uniform(0.95,1.05)
 
@@ -90,6 +84,18 @@ cdef class HiddenDataHMM:
   cdef double _expTransitionFreq(self, double alpha_y, double beta_yprime, double sigma, double tau, double totalProb):
     return alpha_y*sigma*tau*beta_yprime/totalProb
 
+  """ Verify model consistency in computing forward/backward probabilities. """
+  cdef int _verifyProbs(self, double[:] alpha, double[:] beta, double totalProb):
+    cdef double alpha_y, beta_y, prob
+    cdef int y
+    prob = 0.0
+    for y in range(0, self._numStates):
+      prob += self._expEmissionFreq(alpha[y], beta[y], totalProb)
+
+    if abs(1.0 - prob) > 1e-6: # probabilities should sum to 1
+      return 0
+    return 1
+
   """ Perform the E-Step of EM. Return the expectations. """
   cdef tuple _do_EStep(self, int iteration, int iter_cap):
     # s: sentence, n_sentence: # sentences, n: len(sentence), ALPHA=0, BETA=1, j:beta index
@@ -121,12 +127,10 @@ cdef class HiddenDataHMM:
       # iterate over sentence without initial STOP for alpha, last STOP for beta
       # e.g. [STOP, "hello", "world", STOP]
       # Calculate alpha and beta using our sigmas and taus
-      #print "-- compute alpha and beta",
       alphas = alphaBetaMat[ALPHA,:,:]
       betas = alphaBetaMat[BETA,:,:]
 
       for i in xrange(1,n):
-        #sys.stdout.write(".")
         j = n - i - 1
         x_i = sentence[i]
         x_j1 = sentence[j+1]
@@ -135,11 +139,12 @@ cdef class HiddenDataHMM:
 
       for i in xrange(1,n):
         self._normaliseAlphaBeta(alphas[i], betas[i])
+        #if self._verifyProbs == 0:
+        #  sys.stderr.write("Probabilities not valid!\n")
+        #  return (None,None,None)
 
       # Here we go again, now to calculate expectations
-      #print "-- compute expectations",
       for i in xrange(n-1):
-        #sys.stdout.write(".")
         x_i = sentence[i]
         x_i1 = sentence[i+1]
         for y in range(0,self._numStates):
@@ -155,7 +160,6 @@ cdef class HiddenDataHMM:
             sigma = sigmaMat[y,y_]
             tau = self._tau[(y_,x_i1)]
             expected_yy_[y,y_] += self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
-      #sys.stdout.write("done\n")
 
     return (expected_yx, expected_yy_, expected_ycirc) # return expectations
 
@@ -196,6 +200,7 @@ cdef class HiddenDataHMM:
   """
   def train(self, params):
     iter_cap, start_distribution = params
+    print self._sigma
     self._train(iter_cap, start_distribution)
     print self._sigma
 
@@ -214,83 +219,4 @@ cdef class HiddenDataHMM:
 
   def getLabels(self):
     return self._labelHash.keys()
-
-""" A Hidden Markov Model constructed from visible data """
-class VisibleDataHMM:
-
-  """ Construct the HMM object using the outputs and labels (and wordcounts)
-      Pass a dict of word->count for *UNK* substitution in train()
-  """
-  def __init__(self, outputs, labels, counts):
-    self._outputs = outputs # list of list of words
-    self._labels = labels # list of list of states
-    self._counts = counts
-
-    self.sigma = {}
-    self.tau = {}
-    self.xSet = {} # set of unique outputs
-    self.n_sentences = len(labels)
-    if self.n_sentences != len(outputs): # problem
-      raise ValueError("Outputs and labels should be the same size")
-
-    self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)
-
-    self._trained = False
-
-    self._alpha = 1 # add-alpha
-
-  """ Train the HMM by building the sigma and tau mappings.
-        - params is a useless parameter, for conforming to the interface for HMMs
-  """
-  def train(self, params=None):
-    self.n_yy_ = {} # n_y,y' (number of times y' follows y)
-    self.n_ycirc = {} # n_y,o (number of times any label follows y)
-    self.n_yx = {} # n_y,x (number of times label y labels output x)
-
-    # build counts
-    for words,tags in itertools.izip(self._outputs,self._labels):
-      n = len(words)
-      for i in xrange(0, n - 1):
-        y = tags[i]
-        y_ = tags[i+1] # y_ = y'
-        ytuple = (y,y_)
-
-        x = words[i] # corresponding output
-        if self._counts[x] == 1:
-          yunk = (y,"*UNK*")
-          self.n_yx[yunk] = self.n_yx.get(yunk, 0) + 1
-          self.xSet["*UNK*"] = True
-          
-        yxtuple = (y,x)
-
-        self.n_yy_[ytuple] = self.n_yy_.get(ytuple, 0) + 1
-        self.n_ycirc[y] = self.n_ycirc.get(y, 0) + 1
-
-        self.n_yx[yxtuple] = self.n_yx.get(yxtuple, 0) + 1
-
-        self.xSet[x] = True
-
-    # build sigmas
-    self.tagsetSize = len(self.n_ycirc.keys())
-    
-  """ Return the sigma_{y,y'} for given y and y' - or 0 if dne """
-  def getSigma(self, y, yprime):
-    ytuple = (y,yprime)
-    return (self.n_yy_.get(ytuple, 0)+self._alpha)/float(self.n_ycirc.get(y,0) + self._alpha*self.tagsetSize)
-
-
-  """ Return the tau_{y,x} for given y and x - or 0 if dne """
-  def getTau(self, y, x):
-    count = 0
-    if x in self.xSet:
-      count = self.n_yx.get((y,x), 0)
-    else: # x is *UNK*
-      count = self.n_yx.get((y,"*UNK*"), 0)
-
-    tau = count/float(self.n_ycirc[y])
-    return tau
-
-  """ Return a copy of the labels of this HMM """
-  def getLabels(self):
-    return set(self.n_ycirc.keys())
 

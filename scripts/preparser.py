@@ -40,7 +40,9 @@ class AbstractPreparser:
     raise NotImplementedError('Subclasses must override this method!')
   def getSentenceTags(self, line):
     raise NotImplementedError('Subclasses must override this method!')
-  def formatOutput(self, words, tags):
+
+  @staticmethod
+  def formatOutput(words, tags):
     raise NotImplementedError('Subclasses must override this method!')
 
 """ This class will pre-parse POS-tagged files in the format of the WSJ data """
@@ -58,7 +60,8 @@ class EnglishWSJParser(AbstractPreparser):
   def getSentenceTags(self, line):
     return line.split()[1::2]
 
-  def formatOutput(self, words, tags):
+  @staticmethod
+  def formatOutput(words, tags):
     output = ""
     for word,tag in itertools.izip(words, tags):
       output += word + " " + tag + " "
@@ -96,7 +99,8 @@ class SanskritJNUParser(AbstractPreparser):
     #   not whitespace, not a ']' char
     return re.findall(r"\[(.*?)\]", line)
 
-  def formatOutput(self, words, tags):
+  @staticmethod
+  def formatOutput(words, tags):
     n = len(words)
     output = ""
     for i in xrange(0, n):

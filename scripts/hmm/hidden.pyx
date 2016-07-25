@@ -77,7 +77,8 @@ cdef class HiddenDataHMM:
         tau: tau_{y',x_{i+1}}
         totalProb: alpha_STOP(n)
   """
-  cdef double _expTransitionFreq(self, double alpha_y, double beta_yprime, double sigma, double tau, double totalProb):
+  cdef double _expTransitionFreq(self, double alpha_y, double beta_yprime,
+                                 double sigma, double tau, double totalProb):
     return alpha_y*sigma*tau*beta_yprime/totalProb
 
   """ Verify model consistency in computing forward/backward probabilities. """
@@ -111,7 +112,7 @@ cdef class HiddenDataHMM:
     s = 1
     n_sentence = len(self._sentences) 
     for sentence in self._sentences:
-      print "- sentence: %i of %i \t\t (iteration %i/%i)" % (s, n_sentence, iteration, iter_cap)
+      print "- sentence: %i of %i \t\t (iteration %i/%i)"%(s,n_sentence,iteration,iter_cap)
       s+=1
 
       n = len(sentence)
@@ -200,19 +201,27 @@ cdef class HiddenDataHMM:
     self._train(iter_cap, start_distribution)
     print self._sigma
 
+  """ Return sigma_{y,yprime} - transition prob. from state y->yprime """
   def getSigma(self, y, yprime):
     y = self._labelHash[y]
     yprime = self._labelHash[yprime]
     return self._sigma[y,yprime]
 
+  """ Compute tau_{y,x} - emission prob. of state y->output x """
   def getTau(self, y, x):
     y = self._labelHash[y]
     x = hash(x)
     return self._tau[(y,x)]
 
-  def getState(self, tag): # Return the internal state value corresponding to the given POS tag
-    return self._labelHash[tag]
-
+  """ Return a copy of the model's labels """
   def getLabels(self):
-    return self._labelHash.keys()
+    return set(self._labelHash.keys())
+
+  """ Return a copy of the internal mapping of str y -> int i """
+  def getLabelHash(self):
+    return dict(self._labelHash)
+
+  """ Return a copy of the trained internal distributions sigma and tau """
+  def getDistribution(self):
+    return (np.copy(self._sigma), dict(self._tau))
 

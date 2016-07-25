@@ -1877,6 +1877,7 @@ static const char __pyx_k_sum[] = "sum";
 static const char __pyx_k_sys[] = "sys";
 static const char __pyx_k_STOP[] = "STOP";
 static const char __pyx_k_base[] = "base";
+static const char __pyx_k_copy[] = "copy";
 static const char __pyx_k_file[] = "file";
 static const char __pyx_k_full[] = "full";
 static const char __pyx_k_keys[] = "keys";
@@ -2002,6 +2003,7 @@ static PyObject *__pyx_n_s_common;
 static PyObject *__pyx_n_s_common_2;
 static PyObject *__pyx_kp_s_contiguous_and_direct;
 static PyObject *__pyx_kp_s_contiguous_and_indirect;
+static PyObject *__pyx_n_s_copy;
 static PyObject *__pyx_n_s_defaultdict;
 static PyObject *__pyx_n_s_dtype_is_object;
 static PyObject *__pyx_n_s_encode;
@@ -2075,8 +2077,9 @@ static int __pyx_pf_3hmm_6hidden_13HiddenDataHMM___init__(struct __pyx_obj_3hmm_
 static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_2train(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self, PyObject *__pyx_v_params); /* proto */
 static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_4getSigma(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self, PyObject *__pyx_v_y, PyObject *__pyx_v_yprime); /* proto */
 static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_6getTau(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self, PyObject *__pyx_v_y, PyObject *__pyx_v_x); /* proto */
-static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_8getState(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self, PyObject *__pyx_v_tag); /* proto */
-static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_10getLabels(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_8getLabels(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_10getLabelHash(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_12getDistribution(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_10_sentences___get__(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self); /* proto */
 static int __pyx_pf_3hmm_6hidden_13HiddenDataHMM_10_sentences_2__set__(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static int __pyx_pf_3hmm_6hidden_13HiddenDataHMM_10_sentences_4__del__(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self); /* proto */
@@ -3337,9 +3340,9 @@ static double __pyx_f_3hmm_6hidden_13HiddenDataHMM__expEmissionFreq(CYTHON_UNUSE
 /* "hmm/hidden.pyx":80
  *         totalProb: alpha_STOP(n)
  *   """
- *   cdef double _expTransitionFreq(self, double alpha_y, double beta_yprime, double sigma, double tau, double totalProb):             # <<<<<<<<<<<<<<
+ *   cdef double _expTransitionFreq(self, double alpha_y, double beta_yprime,             # <<<<<<<<<<<<<<
+ *                                  double sigma, double tau, double totalProb):
  *     return alpha_y*sigma*tau*beta_yprime/totalProb
- * 
  */
 
 static double __pyx_f_3hmm_6hidden_13HiddenDataHMM__expTransitionFreq(CYTHON_UNUSED struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self, double __pyx_v_alpha_y, double __pyx_v_beta_yprime, double __pyx_v_sigma, double __pyx_v_tau, double __pyx_v_totalProb) {
@@ -3348,9 +3351,9 @@ static double __pyx_f_3hmm_6hidden_13HiddenDataHMM__expTransitionFreq(CYTHON_UNU
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("_expTransitionFreq", 0);
 
-  /* "hmm/hidden.pyx":81
- *   """
- *   cdef double _expTransitionFreq(self, double alpha_y, double beta_yprime, double sigma, double tau, double totalProb):
+  /* "hmm/hidden.pyx":82
+ *   cdef double _expTransitionFreq(self, double alpha_y, double beta_yprime,
+ *                                  double sigma, double tau, double totalProb):
  *     return alpha_y*sigma*tau*beta_yprime/totalProb             # <<<<<<<<<<<<<<
  * 
  *   """ Verify model consistency in computing forward/backward probabilities. """
@@ -3358,7 +3361,7 @@ static double __pyx_f_3hmm_6hidden_13HiddenDataHMM__expTransitionFreq(CYTHON_UNU
   __pyx_t_1 = (((__pyx_v_alpha_y * __pyx_v_sigma) * __pyx_v_tau) * __pyx_v_beta_yprime);
   if (unlikely(__pyx_v_totalProb == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 81, __pyx_L1_error)
+    __PYX_ERR(0, 82, __pyx_L1_error)
   }
   __pyx_r = (__pyx_t_1 / __pyx_v_totalProb);
   goto __pyx_L0;
@@ -3366,9 +3369,9 @@ static double __pyx_f_3hmm_6hidden_13HiddenDataHMM__expTransitionFreq(CYTHON_UNU
   /* "hmm/hidden.pyx":80
  *         totalProb: alpha_STOP(n)
  *   """
- *   cdef double _expTransitionFreq(self, double alpha_y, double beta_yprime, double sigma, double tau, double totalProb):             # <<<<<<<<<<<<<<
+ *   cdef double _expTransitionFreq(self, double alpha_y, double beta_yprime,             # <<<<<<<<<<<<<<
+ *                                  double sigma, double tau, double totalProb):
  *     return alpha_y*sigma*tau*beta_yprime/totalProb
- * 
  */
 
   /* function exit code */
@@ -3380,7 +3383,7 @@ static double __pyx_f_3hmm_6hidden_13HiddenDataHMM__expTransitionFreq(CYTHON_UNU
   return __pyx_r;
 }
 
-/* "hmm/hidden.pyx":84
+/* "hmm/hidden.pyx":85
  * 
  *   """ Verify model consistency in computing forward/backward probabilities. """
  *   cdef int _verifyProbs(self, double[:] alpha, double[:] beta, double totalProb):             # <<<<<<<<<<<<<<
@@ -3401,7 +3404,7 @@ static int __pyx_f_3hmm_6hidden_13HiddenDataHMM__verifyProbs(struct __pyx_obj_3h
   int __pyx_t_6;
   __Pyx_RefNannySetupContext("_verifyProbs", 0);
 
-  /* "hmm/hidden.pyx":87
+  /* "hmm/hidden.pyx":88
  *     cdef double alpha_y, beta_y, prob
  *     cdef int y
  *     prob = 0.0             # <<<<<<<<<<<<<<
@@ -3410,7 +3413,7 @@ static int __pyx_f_3hmm_6hidden_13HiddenDataHMM__verifyProbs(struct __pyx_obj_3h
  */
   __pyx_v_prob = 0.0;
 
-  /* "hmm/hidden.pyx":88
+  /* "hmm/hidden.pyx":89
  *     cdef int y
  *     prob = 0.0
  *     for y in range(0, self._numStates):             # <<<<<<<<<<<<<<
@@ -3421,7 +3424,7 @@ static int __pyx_f_3hmm_6hidden_13HiddenDataHMM__verifyProbs(struct __pyx_obj_3h
   for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
     __pyx_v_y = __pyx_t_2;
 
-    /* "hmm/hidden.pyx":89
+    /* "hmm/hidden.pyx":90
  *     prob = 0.0
  *     for y in range(0, self._numStates):
  *       prob += self._expEmissionFreq(alpha[y], beta[y], totalProb)             # <<<<<<<<<<<<<<
@@ -3436,7 +3439,7 @@ static int __pyx_f_3hmm_6hidden_13HiddenDataHMM__verifyProbs(struct __pyx_obj_3h
     } else if (unlikely(__pyx_t_3 >= __pyx_v_alpha.shape[0])) __pyx_t_4 = 0;
     if (unlikely(__pyx_t_4 != -1)) {
       __Pyx_RaiseBufferIndexError(__pyx_t_4);
-      __PYX_ERR(0, 89, __pyx_L1_error)
+      __PYX_ERR(0, 90, __pyx_L1_error)
     }
     __pyx_t_5 = __pyx_v_y;
     __pyx_t_4 = -1;
@@ -3446,12 +3449,12 @@ static int __pyx_f_3hmm_6hidden_13HiddenDataHMM__verifyProbs(struct __pyx_obj_3h
     } else if (unlikely(__pyx_t_5 >= __pyx_v_beta.shape[0])) __pyx_t_4 = 0;
     if (unlikely(__pyx_t_4 != -1)) {
       __Pyx_RaiseBufferIndexError(__pyx_t_4);
-      __PYX_ERR(0, 89, __pyx_L1_error)
+      __PYX_ERR(0, 90, __pyx_L1_error)
     }
     __pyx_v_prob = (__pyx_v_prob + ((struct __pyx_vtabstruct_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self->__pyx_vtab)->_expEmissionFreq(__pyx_v_self, (*((double *) ( /* dim=0 */ (__pyx_v_alpha.data + __pyx_t_3 * __pyx_v_alpha.strides[0]) ))), (*((double *) ( /* dim=0 */ (__pyx_v_beta.data + __pyx_t_5 * __pyx_v_beta.strides[0]) ))), __pyx_v_totalProb));
   }
 
-  /* "hmm/hidden.pyx":91
+  /* "hmm/hidden.pyx":92
  *       prob += self._expEmissionFreq(alpha[y], beta[y], totalProb)
  * 
  *     if abs(1.0 - prob) > 1e-6: # probabilities should sum to 1             # <<<<<<<<<<<<<<
@@ -3461,7 +3464,7 @@ static int __pyx_f_3hmm_6hidden_13HiddenDataHMM__verifyProbs(struct __pyx_obj_3h
   __pyx_t_6 = ((fabs((1.0 - __pyx_v_prob)) > 1e-6) != 0);
   if (__pyx_t_6) {
 
-    /* "hmm/hidden.pyx":92
+    /* "hmm/hidden.pyx":93
  * 
  *     if abs(1.0 - prob) > 1e-6: # probabilities should sum to 1
  *       return 0             # <<<<<<<<<<<<<<
@@ -3471,7 +3474,7 @@ static int __pyx_f_3hmm_6hidden_13HiddenDataHMM__verifyProbs(struct __pyx_obj_3h
     __pyx_r = 0;
     goto __pyx_L0;
 
-    /* "hmm/hidden.pyx":91
+    /* "hmm/hidden.pyx":92
  *       prob += self._expEmissionFreq(alpha[y], beta[y], totalProb)
  * 
  *     if abs(1.0 - prob) > 1e-6: # probabilities should sum to 1             # <<<<<<<<<<<<<<
@@ -3480,7 +3483,7 @@ static int __pyx_f_3hmm_6hidden_13HiddenDataHMM__verifyProbs(struct __pyx_obj_3h
  */
   }
 
-  /* "hmm/hidden.pyx":93
+  /* "hmm/hidden.pyx":94
  *     if abs(1.0 - prob) > 1e-6: # probabilities should sum to 1
  *       return 0
  *     return 1             # <<<<<<<<<<<<<<
@@ -3490,7 +3493,7 @@ static int __pyx_f_3hmm_6hidden_13HiddenDataHMM__verifyProbs(struct __pyx_obj_3h
   __pyx_r = 1;
   goto __pyx_L0;
 
-  /* "hmm/hidden.pyx":84
+  /* "hmm/hidden.pyx":85
  * 
  *   """ Verify model consistency in computing forward/backward probabilities. """
  *   cdef int _verifyProbs(self, double[:] alpha, double[:] beta, double totalProb):             # <<<<<<<<<<<<<<
@@ -3507,7 +3510,7 @@ static int __pyx_f_3hmm_6hidden_13HiddenDataHMM__verifyProbs(struct __pyx_obj_3h
   return __pyx_r;
 }
 
-/* "hmm/hidden.pyx":96
+/* "hmm/hidden.pyx":97
  * 
  *   """ Perform the E-Step of EM. Return the expectations. """
  *   cdef tuple _do_EStep(self, int iteration, int iter_cap):             # <<<<<<<<<<<<<<
@@ -3611,7 +3614,7 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
   __pyx_pybuffernd_alphaBetaMat.data = NULL;
   __pyx_pybuffernd_alphaBetaMat.rcbuffer = &__pyx_pybuffer_alphaBetaMat;
 
-  /* "hmm/hidden.pyx":102
+  /* "hmm/hidden.pyx":103
  *     cdef np.ndarray[double, ndim=3] alphaBetaMat
  *     cdef long x_i, x_i1, x_j1
  *     cdef int STOPTAGIDX = self._STOPTAG             # <<<<<<<<<<<<<<
@@ -3621,7 +3624,7 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
   __pyx_t_1 = __pyx_v_self->_STOPTAG;
   __pyx_v_STOPTAGIDX = __pyx_t_1;
 
-  /* "hmm/hidden.pyx":105
+  /* "hmm/hidden.pyx":106
  *     cdef double alpha_y, beta_y, totalProb, sigma, tau, expOutputFreq
  * 
  *     cdef double[:,:] sigmaMat = self._sigma # memoryview on numpy array             # <<<<<<<<<<<<<<
@@ -3629,26 +3632,26 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
  *     expected_yx = defaultdict(float) # E[n_{y,x}|x]: (y,x)->float
  */
   __pyx_t_2 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_v_self->_sigma);
-  if (unlikely(!__pyx_t_2.memview)) __PYX_ERR(0, 105, __pyx_L1_error)
+  if (unlikely(!__pyx_t_2.memview)) __PYX_ERR(0, 106, __pyx_L1_error)
   __pyx_v_sigmaMat = __pyx_t_2;
   __pyx_t_2.memview = NULL;
   __pyx_t_2.data = NULL;
 
-  /* "hmm/hidden.pyx":106
+  /* "hmm/hidden.pyx":107
  * 
  *     cdef double[:,:] sigmaMat = self._sigma # memoryview on numpy array
  *     cdef double[:,:] expected_yy_ = np.zeros([self._numStates]*2) # E[n_{y,y'}|x]: (y,y')->float             # <<<<<<<<<<<<<<
  *     expected_yx = defaultdict(float) # E[n_{y,x}|x]: (y,x)->float
  *     cdef double[:] expected_ycirc = np.zeros(self._numStates) # E[n_{y,\circ}|x]: y->float
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 107, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 107, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_self->_numStates); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_self->_numStates); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 107, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = PyList_New(1 * 2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_6 = PyList_New(1 * 2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 107, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   { Py_ssize_t __pyx_temp;
     for (__pyx_temp=0; __pyx_temp < 2; __pyx_temp++) {
@@ -3669,36 +3672,36 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 106, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else {
-    __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 106, __pyx_L1_error)
+    __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 107, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4); __pyx_t_4 = NULL;
     __Pyx_GIVEREF(__pyx_t_6);
     PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 106, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   }
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_2 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_3);
-  if (unlikely(!__pyx_t_2.memview)) __PYX_ERR(0, 106, __pyx_L1_error)
+  if (unlikely(!__pyx_t_2.memview)) __PYX_ERR(0, 107, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_expected_yy_ = __pyx_t_2;
   __pyx_t_2.memview = NULL;
   __pyx_t_2.data = NULL;
 
-  /* "hmm/hidden.pyx":107
+  /* "hmm/hidden.pyx":108
  *     cdef double[:,:] sigmaMat = self._sigma # memoryview on numpy array
  *     cdef double[:,:] expected_yy_ = np.zeros([self._numStates]*2) # E[n_{y,y'}|x]: (y,y')->float
  *     expected_yx = defaultdict(float) # E[n_{y,x}|x]: (y,x)->float             # <<<<<<<<<<<<<<
  *     cdef double[:] expected_ycirc = np.zeros(self._numStates) # E[n_{y,\circ}|x]: y->float
  *     ALPHA, BETA = 0, 1 # indices
  */
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_defaultdict); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 107, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_defaultdict); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_7 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_5))) {
@@ -3711,16 +3714,16 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
     }
   }
   if (!__pyx_t_7) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_5, ((PyObject *)(&PyFloat_Type))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_5, ((PyObject *)(&PyFloat_Type))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
   } else {
-    __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 107, __pyx_L1_error)
+    __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_7); __pyx_t_7 = NULL;
     __Pyx_INCREF(((PyObject *)(&PyFloat_Type)));
     __Pyx_GIVEREF(((PyObject *)(&PyFloat_Type)));
     PyTuple_SET_ITEM(__pyx_t_6, 0+1, ((PyObject *)(&PyFloat_Type)));
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_6, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_6, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
@@ -3728,19 +3731,19 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
   __pyx_v_expected_yx = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "hmm/hidden.pyx":108
+  /* "hmm/hidden.pyx":109
  *     cdef double[:,:] expected_yy_ = np.zeros([self._numStates]*2) # E[n_{y,y'}|x]: (y,y')->float
  *     expected_yx = defaultdict(float) # E[n_{y,x}|x]: (y,x)->float
  *     cdef double[:] expected_ycirc = np.zeros(self._numStates) # E[n_{y,\circ}|x]: y->float             # <<<<<<<<<<<<<<
  *     ALPHA, BETA = 0, 1 # indices
  * 
  */
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 108, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 108, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->_numStates); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 108, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->_numStates); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_7 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_6))) {
@@ -3753,29 +3756,29 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
     }
   }
   if (!__pyx_t_7) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else {
-    __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 108, __pyx_L1_error)
+    __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_7); __pyx_t_7 = NULL;
     __Pyx_GIVEREF(__pyx_t_5);
     PyTuple_SET_ITEM(__pyx_t_4, 0+1, __pyx_t_5);
     __pyx_t_5 = 0;
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_t_8 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_3);
-  if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 108, __pyx_L1_error)
+  if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_expected_ycirc = __pyx_t_8;
   __pyx_t_8.memview = NULL;
   __pyx_t_8.data = NULL;
 
-  /* "hmm/hidden.pyx":109
+  /* "hmm/hidden.pyx":110
  *     expected_yx = defaultdict(float) # E[n_{y,x}|x]: (y,x)->float
  *     cdef double[:] expected_ycirc = np.zeros(self._numStates) # E[n_{y,\circ}|x]: y->float
  *     ALPHA, BETA = 0, 1 # indices             # <<<<<<<<<<<<<<
@@ -3787,7 +3790,7 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
   __pyx_v_ALPHA = __pyx_t_1;
   __pyx_v_BETA = __pyx_t_9;
 
-  /* "hmm/hidden.pyx":111
+  /* "hmm/hidden.pyx":112
  *     ALPHA, BETA = 0, 1 # indices
  * 
  *     s = 1             # <<<<<<<<<<<<<<
@@ -3796,50 +3799,50 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
  */
   __pyx_v_s = 1;
 
-  /* "hmm/hidden.pyx":112
+  /* "hmm/hidden.pyx":113
  * 
  *     s = 1
  *     n_sentence = len(self._sentences)             # <<<<<<<<<<<<<<
  *     for sentence in self._sentences:
- *       print "- sentence: %i of %i \t\t (iteration %i/%i)" % (s, n_sentence, iteration, iter_cap)
+ *       print "- sentence: %i of %i \t\t (iteration %i/%i)"%(s,n_sentence,iteration,iter_cap)
  */
   __pyx_t_3 = __pyx_v_self->_sentences;
   __Pyx_INCREF(__pyx_t_3);
-  __pyx_t_10 = PyObject_Length(__pyx_t_3); if (unlikely(__pyx_t_10 == -1)) __PYX_ERR(0, 112, __pyx_L1_error)
+  __pyx_t_10 = PyObject_Length(__pyx_t_3); if (unlikely(__pyx_t_10 == -1)) __PYX_ERR(0, 113, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_n_sentence = __pyx_t_10;
 
-  /* "hmm/hidden.pyx":113
+  /* "hmm/hidden.pyx":114
  *     s = 1
  *     n_sentence = len(self._sentences)
  *     for sentence in self._sentences:             # <<<<<<<<<<<<<<
- *       print "- sentence: %i of %i \t\t (iteration %i/%i)" % (s, n_sentence, iteration, iter_cap)
+ *       print "- sentence: %i of %i \t\t (iteration %i/%i)"%(s,n_sentence,iteration,iter_cap)
  *       s+=1
  */
   if (likely(PyList_CheckExact(__pyx_v_self->_sentences)) || PyTuple_CheckExact(__pyx_v_self->_sentences)) {
     __pyx_t_3 = __pyx_v_self->_sentences; __Pyx_INCREF(__pyx_t_3); __pyx_t_10 = 0;
     __pyx_t_11 = NULL;
   } else {
-    __pyx_t_10 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_self->_sentences); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 113, __pyx_L1_error)
+    __pyx_t_10 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_self->_sentences); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_11 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 113, __pyx_L1_error)
+    __pyx_t_11 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 114, __pyx_L1_error)
   }
   for (;;) {
     if (likely(!__pyx_t_11)) {
       if (likely(PyList_CheckExact(__pyx_t_3))) {
         if (__pyx_t_10 >= PyList_GET_SIZE(__pyx_t_3)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_10); __Pyx_INCREF(__pyx_t_6); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 113, __pyx_L1_error)
+        __pyx_t_6 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_10); __Pyx_INCREF(__pyx_t_6); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 114, __pyx_L1_error)
         #else
-        __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 113, __pyx_L1_error)
+        __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 114, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         #endif
       } else {
         if (__pyx_t_10 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_10); __Pyx_INCREF(__pyx_t_6); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 113, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_10); __Pyx_INCREF(__pyx_t_6); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 114, __pyx_L1_error)
         #else
-        __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 113, __pyx_L1_error)
+        __pyx_t_6 = PySequence_ITEM(__pyx_t_3, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 114, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         #endif
       }
@@ -3849,7 +3852,7 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 113, __pyx_L1_error)
+          else __PYX_ERR(0, 114, __pyx_L1_error)
         }
         break;
       }
@@ -3858,22 +3861,22 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
     __Pyx_XDECREF_SET(__pyx_v_sentence, __pyx_t_6);
     __pyx_t_6 = 0;
 
-    /* "hmm/hidden.pyx":114
+    /* "hmm/hidden.pyx":115
  *     n_sentence = len(self._sentences)
  *     for sentence in self._sentences:
- *       print "- sentence: %i of %i \t\t (iteration %i/%i)" % (s, n_sentence, iteration, iter_cap)             # <<<<<<<<<<<<<<
+ *       print "- sentence: %i of %i \t\t (iteration %i/%i)"%(s,n_sentence,iteration,iter_cap)             # <<<<<<<<<<<<<<
  *       s+=1
  * 
  */
-    __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_s); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_s); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_n_sentence); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_n_sentence); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_iteration); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_iteration); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_iter_cap); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_iter_cap); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_12 = PyTuple_New(4); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_12 = PyTuple_New(4); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_12);
     __Pyx_GIVEREF(__pyx_t_6);
     PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_6);
@@ -3887,48 +3890,48 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
     __pyx_t_4 = 0;
     __pyx_t_5 = 0;
     __pyx_t_7 = 0;
-    __pyx_t_7 = __Pyx_PyString_Format(__pyx_kp_s_sentence_i_of_i_iteration_i_i, __pyx_t_12); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyString_Format(__pyx_kp_s_sentence_i_of_i_iteration_i_i, __pyx_t_12); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-    if (__Pyx_PrintOne(0, __pyx_t_7) < 0) __PYX_ERR(0, 114, __pyx_L1_error)
+    if (__Pyx_PrintOne(0, __pyx_t_7) < 0) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-    /* "hmm/hidden.pyx":115
+    /* "hmm/hidden.pyx":116
  *     for sentence in self._sentences:
- *       print "- sentence: %i of %i \t\t (iteration %i/%i)" % (s, n_sentence, iteration, iter_cap)
+ *       print "- sentence: %i of %i \t\t (iteration %i/%i)"%(s,n_sentence,iteration,iter_cap)
  *       s+=1             # <<<<<<<<<<<<<<
  * 
  *       n = len(sentence)
  */
     __pyx_v_s = (__pyx_v_s + 1);
 
-    /* "hmm/hidden.pyx":117
+    /* "hmm/hidden.pyx":118
  *       s+=1
  * 
  *       n = len(sentence)             # <<<<<<<<<<<<<<
  * 
  *       alphaBetaMat = np.zeros([2, n, self._numStates]) # [alpha or beta][timestep][state] -> prob.
  */
-    __pyx_t_13 = PyObject_Length(__pyx_v_sentence); if (unlikely(__pyx_t_13 == -1)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __pyx_t_13 = PyObject_Length(__pyx_v_sentence); if (unlikely(__pyx_t_13 == -1)) __PYX_ERR(0, 118, __pyx_L1_error)
     __pyx_v_n = __pyx_t_13;
 
-    /* "hmm/hidden.pyx":119
+    /* "hmm/hidden.pyx":120
  *       n = len(sentence)
  * 
  *       alphaBetaMat = np.zeros([2, n, self._numStates]) # [alpha or beta][timestep][state] -> prob.             # <<<<<<<<<<<<<<
  *       alphaBetaMat[ALPHA,0,STOPTAGIDX] = 1.0
  *       alphaBetaMat[BETA,(n-1),STOPTAGIDX] = 1.0
  */
-    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 119, __pyx_L1_error)
+    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 120, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_12);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_12, __pyx_n_s_zeros); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 119, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_12, __pyx_n_s_zeros); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 120, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-    __pyx_t_12 = __Pyx_PyInt_From_int(__pyx_v_n); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 119, __pyx_L1_error)
+    __pyx_t_12 = __Pyx_PyInt_From_int(__pyx_v_n); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 120, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_12);
-    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_self->_numStates); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 119, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_self->_numStates); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 120, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = PyList_New(3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 119, __pyx_L1_error)
+    __pyx_t_6 = PyList_New(3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 120, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_INCREF(__pyx_int_2);
     __Pyx_GIVEREF(__pyx_int_2);
@@ -3950,22 +3953,22 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
       }
     }
     if (!__pyx_t_4) {
-      __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 119, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 120, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_GOTREF(__pyx_t_7);
     } else {
-      __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 119, __pyx_L1_error)
+      __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 120, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_12);
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_4); __pyx_t_4 = NULL;
       __Pyx_GIVEREF(__pyx_t_6);
       PyTuple_SET_ITEM(__pyx_t_12, 0+1, __pyx_t_6);
       __pyx_t_6 = 0;
-      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_12, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 119, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_12, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 120, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
     }
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 119, __pyx_L1_error)
+    if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 120, __pyx_L1_error)
     __pyx_t_14 = ((PyArrayObject *)__pyx_t_7);
     {
       __Pyx_BufFmt_StackElem __pyx_stack[1];
@@ -3981,13 +3984,13 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
         }
       }
       __pyx_pybuffernd_alphaBetaMat.diminfo[0].strides = __pyx_pybuffernd_alphaBetaMat.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_alphaBetaMat.diminfo[0].shape = __pyx_pybuffernd_alphaBetaMat.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_alphaBetaMat.diminfo[1].strides = __pyx_pybuffernd_alphaBetaMat.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_alphaBetaMat.diminfo[1].shape = __pyx_pybuffernd_alphaBetaMat.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_alphaBetaMat.diminfo[2].strides = __pyx_pybuffernd_alphaBetaMat.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_alphaBetaMat.diminfo[2].shape = __pyx_pybuffernd_alphaBetaMat.rcbuffer->pybuffer.shape[2];
-      if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 119, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 120, __pyx_L1_error)
     }
     __pyx_t_14 = 0;
     __Pyx_XDECREF_SET(__pyx_v_alphaBetaMat, ((PyArrayObject *)__pyx_t_7));
     __pyx_t_7 = 0;
 
-    /* "hmm/hidden.pyx":120
+    /* "hmm/hidden.pyx":121
  * 
  *       alphaBetaMat = np.zeros([2, n, self._numStates]) # [alpha or beta][timestep][state] -> prob.
  *       alphaBetaMat[ALPHA,0,STOPTAGIDX] = 1.0             # <<<<<<<<<<<<<<
@@ -4012,11 +4015,11 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
     } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_alphaBetaMat.diminfo[2].shape)) __pyx_t_9 = 2;
     if (unlikely(__pyx_t_9 != -1)) {
       __Pyx_RaiseBufferIndexError(__pyx_t_9);
-      __PYX_ERR(0, 120, __pyx_L1_error)
+      __PYX_ERR(0, 121, __pyx_L1_error)
     }
     *__Pyx_BufPtrStrided3d(double *, __pyx_pybuffernd_alphaBetaMat.rcbuffer->pybuffer.buf, __pyx_t_18, __pyx_pybuffernd_alphaBetaMat.diminfo[0].strides, __pyx_t_19, __pyx_pybuffernd_alphaBetaMat.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_alphaBetaMat.diminfo[2].strides) = 1.0;
 
-    /* "hmm/hidden.pyx":121
+    /* "hmm/hidden.pyx":122
  *       alphaBetaMat = np.zeros([2, n, self._numStates]) # [alpha or beta][timestep][state] -> prob.
  *       alphaBetaMat[ALPHA,0,STOPTAGIDX] = 1.0
  *       alphaBetaMat[BETA,(n-1),STOPTAGIDX] = 1.0             # <<<<<<<<<<<<<<
@@ -4041,20 +4044,20 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
     } else if (unlikely(__pyx_t_23 >= __pyx_pybuffernd_alphaBetaMat.diminfo[2].shape)) __pyx_t_9 = 2;
     if (unlikely(__pyx_t_9 != -1)) {
       __Pyx_RaiseBufferIndexError(__pyx_t_9);
-      __PYX_ERR(0, 121, __pyx_L1_error)
+      __PYX_ERR(0, 122, __pyx_L1_error)
     }
     *__Pyx_BufPtrStrided3d(double *, __pyx_pybuffernd_alphaBetaMat.rcbuffer->pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_alphaBetaMat.diminfo[0].strides, __pyx_t_22, __pyx_pybuffernd_alphaBetaMat.diminfo[1].strides, __pyx_t_23, __pyx_pybuffernd_alphaBetaMat.diminfo[2].strides) = 1.0;
 
-    /* "hmm/hidden.pyx":126
+    /* "hmm/hidden.pyx":127
  *       # e.g. [STOP, "hello", "world", STOP]
  *       # Calculate alpha and beta using our sigmas and taus
  *       alphas = alphaBetaMat[ALPHA,:,:]             # <<<<<<<<<<<<<<
  *       betas = alphaBetaMat[BETA,:,:]
  * 
  */
-    __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_ALPHA); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 126, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_ALPHA); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 127, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 126, __pyx_L1_error)
+    __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 127, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_GIVEREF(__pyx_t_7);
     PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_7);
@@ -4065,10 +4068,10 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
     __Pyx_GIVEREF(__pyx_slice__3);
     PyTuple_SET_ITEM(__pyx_t_5, 2, __pyx_slice__3);
     __pyx_t_7 = 0;
-    __pyx_t_7 = PyObject_GetItem(((PyObject *)__pyx_v_alphaBetaMat), __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 126, __pyx_L1_error)
+    __pyx_t_7 = PyObject_GetItem(((PyObject *)__pyx_v_alphaBetaMat), __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 127, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 126, __pyx_L1_error)
+    if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 127, __pyx_L1_error)
     __pyx_t_24 = ((PyArrayObject *)__pyx_t_7);
     {
       __Pyx_BufFmt_StackElem __pyx_stack[1];
@@ -4084,22 +4087,22 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
         }
       }
       __pyx_pybuffernd_alphas.diminfo[0].strides = __pyx_pybuffernd_alphas.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_alphas.diminfo[0].shape = __pyx_pybuffernd_alphas.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_alphas.diminfo[1].strides = __pyx_pybuffernd_alphas.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_alphas.diminfo[1].shape = __pyx_pybuffernd_alphas.rcbuffer->pybuffer.shape[1];
-      if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 126, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 127, __pyx_L1_error)
     }
     __pyx_t_24 = 0;
     __Pyx_XDECREF_SET(__pyx_v_alphas, ((PyArrayObject *)__pyx_t_7));
     __pyx_t_7 = 0;
 
-    /* "hmm/hidden.pyx":127
+    /* "hmm/hidden.pyx":128
  *       # Calculate alpha and beta using our sigmas and taus
  *       alphas = alphaBetaMat[ALPHA,:,:]
  *       betas = alphaBetaMat[BETA,:,:]             # <<<<<<<<<<<<<<
  * 
  *       for i in xrange(1,n):
  */
-    __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_BETA); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 127, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_BETA); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 128, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 127, __pyx_L1_error)
+    __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 128, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_GIVEREF(__pyx_t_7);
     PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_7);
@@ -4110,10 +4113,10 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
     __Pyx_GIVEREF(__pyx_slice__5);
     PyTuple_SET_ITEM(__pyx_t_5, 2, __pyx_slice__5);
     __pyx_t_7 = 0;
-    __pyx_t_7 = PyObject_GetItem(((PyObject *)__pyx_v_alphaBetaMat), __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 127, __pyx_L1_error)
+    __pyx_t_7 = PyObject_GetItem(((PyObject *)__pyx_v_alphaBetaMat), __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 128, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 127, __pyx_L1_error)
+    if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 128, __pyx_L1_error)
     __pyx_t_24 = ((PyArrayObject *)__pyx_t_7);
     {
       __Pyx_BufFmt_StackElem __pyx_stack[1];
@@ -4129,13 +4132,13 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
         }
       }
       __pyx_pybuffernd_betas.diminfo[0].strides = __pyx_pybuffernd_betas.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_betas.diminfo[0].shape = __pyx_pybuffernd_betas.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_betas.diminfo[1].strides = __pyx_pybuffernd_betas.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_betas.diminfo[1].shape = __pyx_pybuffernd_betas.rcbuffer->pybuffer.shape[1];
-      if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 127, __pyx_L1_error)
+      if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 128, __pyx_L1_error)
     }
     __pyx_t_24 = 0;
     __Pyx_XDECREF_SET(__pyx_v_betas, ((PyArrayObject *)__pyx_t_7));
     __pyx_t_7 = 0;
 
-    /* "hmm/hidden.pyx":129
+    /* "hmm/hidden.pyx":130
  *       betas = alphaBetaMat[BETA,:,:]
  * 
  *       for i in xrange(1,n):             # <<<<<<<<<<<<<<
@@ -4146,7 +4149,7 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
     for (__pyx_t_1 = 1; __pyx_t_1 < __pyx_t_9; __pyx_t_1+=1) {
       __pyx_v_i = __pyx_t_1;
 
-      /* "hmm/hidden.pyx":130
+      /* "hmm/hidden.pyx":131
  * 
  *       for i in xrange(1,n):
  *         j = n - i - 1             # <<<<<<<<<<<<<<
@@ -4155,20 +4158,20 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
  */
       __pyx_v_j = ((__pyx_v_n - __pyx_v_i) - 1);
 
-      /* "hmm/hidden.pyx":131
+      /* "hmm/hidden.pyx":132
  *       for i in xrange(1,n):
  *         j = n - i - 1
  *         x_i = sentence[i]             # <<<<<<<<<<<<<<
  *         x_j1 = sentence[j+1]
  *         self._computeAlphasTimestep(sigmaMat, alphas, i, x_i) # compute alphas for this timestep
  */
-      __pyx_t_7 = __Pyx_GetItemInt(__pyx_v_sentence, __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 131, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_GetItemInt(__pyx_v_sentence, __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 132, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_25 = __Pyx_PyInt_As_long(__pyx_t_7); if (unlikely((__pyx_t_25 == (long)-1) && PyErr_Occurred())) __PYX_ERR(0, 131, __pyx_L1_error)
+      __pyx_t_25 = __Pyx_PyInt_As_long(__pyx_t_7); if (unlikely((__pyx_t_25 == (long)-1) && PyErr_Occurred())) __PYX_ERR(0, 132, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __pyx_v_x_i = __pyx_t_25;
 
-      /* "hmm/hidden.pyx":132
+      /* "hmm/hidden.pyx":133
  *         j = n - i - 1
  *         x_i = sentence[i]
  *         x_j1 = sentence[j+1]             # <<<<<<<<<<<<<<
@@ -4176,13 +4179,13 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
  *         self._computeBetasTimestep(sigmaMat, betas, j, x_j1) # compute betas for this timestep
  */
       __pyx_t_25 = (__pyx_v_j + 1);
-      __pyx_t_7 = __Pyx_GetItemInt(__pyx_v_sentence, __pyx_t_25, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 132, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_GetItemInt(__pyx_v_sentence, __pyx_t_25, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 133, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_25 = __Pyx_PyInt_As_long(__pyx_t_7); if (unlikely((__pyx_t_25 == (long)-1) && PyErr_Occurred())) __PYX_ERR(0, 132, __pyx_L1_error)
+      __pyx_t_25 = __Pyx_PyInt_As_long(__pyx_t_7); if (unlikely((__pyx_t_25 == (long)-1) && PyErr_Occurred())) __PYX_ERR(0, 133, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __pyx_v_x_j1 = __pyx_t_25;
 
-      /* "hmm/hidden.pyx":133
+      /* "hmm/hidden.pyx":134
  *         x_i = sentence[i]
  *         x_j1 = sentence[j+1]
  *         self._computeAlphasTimestep(sigmaMat, alphas, i, x_i) # compute alphas for this timestep             # <<<<<<<<<<<<<<
@@ -4190,11 +4193,11 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
  * 
  */
       __pyx_t_2 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(((PyObject *)__pyx_v_alphas));
-      if (unlikely(!__pyx_t_2.memview)) __PYX_ERR(0, 133, __pyx_L1_error)
+      if (unlikely(!__pyx_t_2.memview)) __PYX_ERR(0, 134, __pyx_L1_error)
       ((struct __pyx_vtabstruct_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self->__pyx_vtab)->_computeAlphasTimestep(__pyx_v_self, __pyx_v_sigmaMat, __pyx_t_2, __pyx_v_i, __pyx_v_x_i);
       __PYX_XDEC_MEMVIEW(&__pyx_t_2, 1);
 
-      /* "hmm/hidden.pyx":134
+      /* "hmm/hidden.pyx":135
  *         x_j1 = sentence[j+1]
  *         self._computeAlphasTimestep(sigmaMat, alphas, i, x_i) # compute alphas for this timestep
  *         self._computeBetasTimestep(sigmaMat, betas, j, x_j1) # compute betas for this timestep             # <<<<<<<<<<<<<<
@@ -4202,12 +4205,12 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
  *       for i in xrange(0,n):
  */
       __pyx_t_2 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(((PyObject *)__pyx_v_betas));
-      if (unlikely(!__pyx_t_2.memview)) __PYX_ERR(0, 134, __pyx_L1_error)
+      if (unlikely(!__pyx_t_2.memview)) __PYX_ERR(0, 135, __pyx_L1_error)
       ((struct __pyx_vtabstruct_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self->__pyx_vtab)->_computeBetasTimestep(__pyx_v_self, __pyx_v_sigmaMat, __pyx_t_2, __pyx_v_j, __pyx_v_x_j1);
       __PYX_XDEC_MEMVIEW(&__pyx_t_2, 1);
     }
 
-    /* "hmm/hidden.pyx":136
+    /* "hmm/hidden.pyx":137
  *         self._computeBetasTimestep(sigmaMat, betas, j, x_j1) # compute betas for this timestep
  * 
  *       for i in xrange(0,n):             # <<<<<<<<<<<<<<
@@ -4218,73 +4221,73 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
     for (__pyx_t_1 = 0; __pyx_t_1 < __pyx_t_9; __pyx_t_1+=1) {
       __pyx_v_i = __pyx_t_1;
 
-      /* "hmm/hidden.pyx":137
+      /* "hmm/hidden.pyx":138
  * 
  *       for i in xrange(0,n):
  *         self._normaliseAlphaBeta(alphas[i], betas[i])             # <<<<<<<<<<<<<<
  *         if self._verifyProbs(alphas[i], betas[i], betas[0][STOPTAGIDX]) == 0:
  *           sys.stderr.write("Probabilities not valid!\n")
  */
-      __pyx_t_7 = __Pyx_GetItemInt(((PyObject *)__pyx_v_alphas), __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 137, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_GetItemInt(((PyObject *)__pyx_v_alphas), __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 138, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 137, __pyx_L1_error)
-      __pyx_t_5 = __Pyx_GetItemInt(((PyObject *)__pyx_v_betas), __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 137, __pyx_L1_error)
+      if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 138, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_GetItemInt(((PyObject *)__pyx_v_betas), __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 138, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 137, __pyx_L1_error)
+      if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 138, __pyx_L1_error)
       ((struct __pyx_vtabstruct_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self->__pyx_vtab)->_normaliseAlphaBeta(__pyx_v_self, ((PyArrayObject *)__pyx_t_7), ((PyArrayObject *)__pyx_t_5));
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-      /* "hmm/hidden.pyx":138
+      /* "hmm/hidden.pyx":139
  *       for i in xrange(0,n):
  *         self._normaliseAlphaBeta(alphas[i], betas[i])
  *         if self._verifyProbs(alphas[i], betas[i], betas[0][STOPTAGIDX]) == 0:             # <<<<<<<<<<<<<<
  *           sys.stderr.write("Probabilities not valid!\n")
  *           return (None,None,None)
  */
-      __pyx_t_5 = __Pyx_GetItemInt(((PyObject *)__pyx_v_alphas), __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 138, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_GetItemInt(((PyObject *)__pyx_v_alphas), __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 139, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __pyx_t_8 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_5);
-      if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 138, __pyx_L1_error)
+      if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 139, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __pyx_t_5 = __Pyx_GetItemInt(((PyObject *)__pyx_v_betas), __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 138, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_GetItemInt(((PyObject *)__pyx_v_betas), __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 139, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __pyx_t_26 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_5);
-      if (unlikely(!__pyx_t_26.memview)) __PYX_ERR(0, 138, __pyx_L1_error)
+      if (unlikely(!__pyx_t_26.memview)) __PYX_ERR(0, 139, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __pyx_t_5 = __Pyx_GetItemInt(((PyObject *)__pyx_v_betas), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 138, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_GetItemInt(((PyObject *)__pyx_v_betas), 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 139, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_7 = __Pyx_GetItemInt(__pyx_t_5, __pyx_v_STOPTAGIDX, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 138, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_GetItemInt(__pyx_t_5, __pyx_v_STOPTAGIDX, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 139, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __pyx_t_27 = __pyx_PyFloat_AsDouble(__pyx_t_7); if (unlikely((__pyx_t_27 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 138, __pyx_L1_error)
+      __pyx_t_27 = __pyx_PyFloat_AsDouble(__pyx_t_7); if (unlikely((__pyx_t_27 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 139, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __pyx_t_28 = ((((struct __pyx_vtabstruct_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self->__pyx_vtab)->_verifyProbs(__pyx_v_self, __pyx_t_8, __pyx_t_26, __pyx_t_27) == 0) != 0);
       __PYX_XDEC_MEMVIEW(&__pyx_t_8, 1);
       __PYX_XDEC_MEMVIEW(&__pyx_t_26, 1);
       if (__pyx_t_28) {
 
-        /* "hmm/hidden.pyx":139
+        /* "hmm/hidden.pyx":140
  *         self._normaliseAlphaBeta(alphas[i], betas[i])
  *         if self._verifyProbs(alphas[i], betas[i], betas[0][STOPTAGIDX]) == 0:
  *           sys.stderr.write("Probabilities not valid!\n")             # <<<<<<<<<<<<<<
  *           return (None,None,None)
  * 
  */
-        __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_sys); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 139, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_sys); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 140, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_stderr); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 139, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_stderr); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 140, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_write); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 139, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_write); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 140, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-        __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 139, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 140, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-        /* "hmm/hidden.pyx":140
+        /* "hmm/hidden.pyx":141
  *         if self._verifyProbs(alphas[i], betas[i], betas[0][STOPTAGIDX]) == 0:
  *           sys.stderr.write("Probabilities not valid!\n")
  *           return (None,None,None)             # <<<<<<<<<<<<<<
@@ -4297,7 +4300,7 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         goto __pyx_L0;
 
-        /* "hmm/hidden.pyx":138
+        /* "hmm/hidden.pyx":139
  *       for i in xrange(0,n):
  *         self._normaliseAlphaBeta(alphas[i], betas[i])
  *         if self._verifyProbs(alphas[i], betas[i], betas[0][STOPTAGIDX]) == 0:             # <<<<<<<<<<<<<<
@@ -4307,7 +4310,7 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
       }
     }
 
-    /* "hmm/hidden.pyx":143
+    /* "hmm/hidden.pyx":144
  * 
  *       # Here we go again, now to calculate expectations
  *       for i in xrange(n-1):             # <<<<<<<<<<<<<<
@@ -4318,20 +4321,20 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
     for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_25; __pyx_t_9+=1) {
       __pyx_v_i = __pyx_t_9;
 
-      /* "hmm/hidden.pyx":144
+      /* "hmm/hidden.pyx":145
  *       # Here we go again, now to calculate expectations
  *       for i in xrange(n-1):
  *         x_i = sentence[i]             # <<<<<<<<<<<<<<
  *         x_i1 = sentence[i+1]
  *         for y in range(0,self._numStates):
  */
-      __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_sentence, __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 144, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_sentence, __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 145, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_29 = __Pyx_PyInt_As_long(__pyx_t_5); if (unlikely((__pyx_t_29 == (long)-1) && PyErr_Occurred())) __PYX_ERR(0, 144, __pyx_L1_error)
+      __pyx_t_29 = __Pyx_PyInt_As_long(__pyx_t_5); if (unlikely((__pyx_t_29 == (long)-1) && PyErr_Occurred())) __PYX_ERR(0, 145, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __pyx_v_x_i = __pyx_t_29;
 
-      /* "hmm/hidden.pyx":145
+      /* "hmm/hidden.pyx":146
  *       for i in xrange(n-1):
  *         x_i = sentence[i]
  *         x_i1 = sentence[i+1]             # <<<<<<<<<<<<<<
@@ -4339,13 +4342,13 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
  *           alpha_y = alphas[i,y]
  */
       __pyx_t_29 = (__pyx_v_i + 1);
-      __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_sentence, __pyx_t_29, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 145, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_sentence, __pyx_t_29, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 146, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_29 = __Pyx_PyInt_As_long(__pyx_t_5); if (unlikely((__pyx_t_29 == (long)-1) && PyErr_Occurred())) __PYX_ERR(0, 145, __pyx_L1_error)
+      __pyx_t_29 = __Pyx_PyInt_As_long(__pyx_t_5); if (unlikely((__pyx_t_29 == (long)-1) && PyErr_Occurred())) __PYX_ERR(0, 146, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __pyx_v_x_i1 = __pyx_t_29;
 
-      /* "hmm/hidden.pyx":146
+      /* "hmm/hidden.pyx":147
  *         x_i = sentence[i]
  *         x_i1 = sentence[i+1]
  *         for y in range(0,self._numStates):             # <<<<<<<<<<<<<<
@@ -4356,7 +4359,7 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
       for (__pyx_t_29 = 0; __pyx_t_29 < __pyx_t_1; __pyx_t_29+=1) {
         __pyx_v_y = __pyx_t_29;
 
-        /* "hmm/hidden.pyx":147
+        /* "hmm/hidden.pyx":148
  *         x_i1 = sentence[i+1]
  *         for y in range(0,self._numStates):
  *           alpha_y = alphas[i,y]             # <<<<<<<<<<<<<<
@@ -4376,11 +4379,11 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
         } else if (unlikely(__pyx_t_31 >= __pyx_pybuffernd_alphas.diminfo[1].shape)) __pyx_t_32 = 1;
         if (unlikely(__pyx_t_32 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_32);
-          __PYX_ERR(0, 147, __pyx_L1_error)
+          __PYX_ERR(0, 148, __pyx_L1_error)
         }
         __pyx_v_alpha_y = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_alphas.rcbuffer->pybuffer.buf, __pyx_t_30, __pyx_pybuffernd_alphas.diminfo[0].strides, __pyx_t_31, __pyx_pybuffernd_alphas.diminfo[1].strides));
 
-        /* "hmm/hidden.pyx":148
+        /* "hmm/hidden.pyx":149
  *         for y in range(0,self._numStates):
  *           alpha_y = alphas[i,y]
  *           beta_y = betas[i,y]             # <<<<<<<<<<<<<<
@@ -4400,11 +4403,11 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
         } else if (unlikely(__pyx_t_34 >= __pyx_pybuffernd_betas.diminfo[1].shape)) __pyx_t_32 = 1;
         if (unlikely(__pyx_t_32 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_32);
-          __PYX_ERR(0, 148, __pyx_L1_error)
+          __PYX_ERR(0, 149, __pyx_L1_error)
         }
         __pyx_v_beta_y = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_betas.rcbuffer->pybuffer.buf, __pyx_t_33, __pyx_pybuffernd_betas.diminfo[0].strides, __pyx_t_34, __pyx_pybuffernd_betas.diminfo[1].strides));
 
-        /* "hmm/hidden.pyx":149
+        /* "hmm/hidden.pyx":150
  *           alpha_y = alphas[i,y]
  *           beta_y = betas[i,y]
  *           totalProb = alphas[(n-1),STOPTAGIDX]             # <<<<<<<<<<<<<<
@@ -4424,11 +4427,11 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
         } else if (unlikely(__pyx_t_36 >= __pyx_pybuffernd_alphas.diminfo[1].shape)) __pyx_t_32 = 1;
         if (unlikely(__pyx_t_32 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_32);
-          __PYX_ERR(0, 149, __pyx_L1_error)
+          __PYX_ERR(0, 150, __pyx_L1_error)
         }
         __pyx_v_totalProb = (*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_alphas.rcbuffer->pybuffer.buf, __pyx_t_35, __pyx_pybuffernd_alphas.diminfo[0].strides, __pyx_t_36, __pyx_pybuffernd_alphas.diminfo[1].strides));
 
-        /* "hmm/hidden.pyx":150
+        /* "hmm/hidden.pyx":151
  *           beta_y = betas[i,y]
  *           totalProb = alphas[(n-1),STOPTAGIDX]
  *           expOutputFreq = self._expEmissionFreq(alpha_y, beta_y, totalProb)             # <<<<<<<<<<<<<<
@@ -4437,18 +4440,18 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
  */
         __pyx_v_expOutputFreq = ((struct __pyx_vtabstruct_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self->__pyx_vtab)->_expEmissionFreq(__pyx_v_self, __pyx_v_alpha_y, __pyx_v_beta_y, __pyx_v_totalProb);
 
-        /* "hmm/hidden.pyx":151
+        /* "hmm/hidden.pyx":152
  *           totalProb = alphas[(n-1),STOPTAGIDX]
  *           expOutputFreq = self._expEmissionFreq(alpha_y, beta_y, totalProb)
  *           expected_yx[(y,x_i)] += expOutputFreq             # <<<<<<<<<<<<<<
  *           expected_ycirc[y] += expOutputFreq
  * 
  */
-        __pyx_t_5 = __Pyx_PyInt_From_long(__pyx_v_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 151, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyInt_From_long(__pyx_v_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 152, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyInt_From_long(__pyx_v_x_i); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 151, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyInt_From_long(__pyx_v_x_i); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 152, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_12 = PyTuple_New(2); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 151, __pyx_L1_error)
+        __pyx_t_12 = PyTuple_New(2); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 152, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_12);
         __Pyx_GIVEREF(__pyx_t_5);
         PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_5);
@@ -4456,19 +4459,19 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
         PyTuple_SET_ITEM(__pyx_t_12, 1, __pyx_t_7);
         __pyx_t_5 = 0;
         __pyx_t_7 = 0;
-        __pyx_t_7 = PyObject_GetItem(__pyx_v_expected_yx, __pyx_t_12); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 151, __pyx_L1_error)
+        __pyx_t_7 = PyObject_GetItem(__pyx_v_expected_yx, __pyx_t_12); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 152, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_5 = PyFloat_FromDouble(__pyx_v_expOutputFreq); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 151, __pyx_L1_error)
+        __pyx_t_5 = PyFloat_FromDouble(__pyx_v_expOutputFreq); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 152, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_6 = PyNumber_InPlaceAdd(__pyx_t_7, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 151, __pyx_L1_error)
+        __pyx_t_6 = PyNumber_InPlaceAdd(__pyx_t_7, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 152, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-        if (unlikely(PyObject_SetItem(__pyx_v_expected_yx, __pyx_t_12, __pyx_t_6) < 0)) __PYX_ERR(0, 151, __pyx_L1_error)
+        if (unlikely(PyObject_SetItem(__pyx_v_expected_yx, __pyx_t_12, __pyx_t_6) < 0)) __PYX_ERR(0, 152, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
         __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
 
-        /* "hmm/hidden.pyx":152
+        /* "hmm/hidden.pyx":153
  *           expOutputFreq = self._expEmissionFreq(alpha_y, beta_y, totalProb)
  *           expected_yx[(y,x_i)] += expOutputFreq
  *           expected_ycirc[y] += expOutputFreq             # <<<<<<<<<<<<<<
@@ -4483,11 +4486,11 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
         } else if (unlikely(__pyx_t_37 >= __pyx_v_expected_ycirc.shape[0])) __pyx_t_32 = 0;
         if (unlikely(__pyx_t_32 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_32);
-          __PYX_ERR(0, 152, __pyx_L1_error)
+          __PYX_ERR(0, 153, __pyx_L1_error)
         }
         *((double *) ( /* dim=0 */ (__pyx_v_expected_ycirc.data + __pyx_t_37 * __pyx_v_expected_ycirc.strides[0]) )) += __pyx_v_expOutputFreq;
 
-        /* "hmm/hidden.pyx":154
+        /* "hmm/hidden.pyx":155
  *           expected_ycirc[y] += expOutputFreq
  * 
  *           for y_ in range(0,self._numStates): # iterate over y' for E[n_{y,y'}|x]             # <<<<<<<<<<<<<<
@@ -4498,7 +4501,7 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
         for (__pyx_t_38 = 0; __pyx_t_38 < __pyx_t_32; __pyx_t_38+=1) {
           __pyx_v_y_ = __pyx_t_38;
 
-          /* "hmm/hidden.pyx":155
+          /* "hmm/hidden.pyx":156
  * 
  *           for y_ in range(0,self._numStates): # iterate over y' for E[n_{y,y'}|x]
  *             beta_y_ = betas[(i+1),y_]             # <<<<<<<<<<<<<<
@@ -4518,14 +4521,14 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
           } else if (unlikely(__pyx_t_40 >= __pyx_pybuffernd_betas.diminfo[1].shape)) __pyx_t_41 = 1;
           if (unlikely(__pyx_t_41 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_41);
-            __PYX_ERR(0, 155, __pyx_L1_error)
+            __PYX_ERR(0, 156, __pyx_L1_error)
           }
-          __pyx_t_12 = PyFloat_FromDouble((*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_betas.rcbuffer->pybuffer.buf, __pyx_t_39, __pyx_pybuffernd_betas.diminfo[0].strides, __pyx_t_40, __pyx_pybuffernd_betas.diminfo[1].strides))); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 155, __pyx_L1_error)
+          __pyx_t_12 = PyFloat_FromDouble((*__Pyx_BufPtrStrided2d(double *, __pyx_pybuffernd_betas.rcbuffer->pybuffer.buf, __pyx_t_39, __pyx_pybuffernd_betas.diminfo[0].strides, __pyx_t_40, __pyx_pybuffernd_betas.diminfo[1].strides))); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 156, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_12);
           __Pyx_XDECREF_SET(__pyx_v_beta_y_, __pyx_t_12);
           __pyx_t_12 = 0;
 
-          /* "hmm/hidden.pyx":156
+          /* "hmm/hidden.pyx":157
  *           for y_ in range(0,self._numStates): # iterate over y' for E[n_{y,y'}|x]
  *             beta_y_ = betas[(i+1),y_]
  *             sigma = sigmaMat[y,y_]             # <<<<<<<<<<<<<<
@@ -4545,22 +4548,22 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
           } else if (unlikely(__pyx_t_43 >= __pyx_v_sigmaMat.shape[1])) __pyx_t_41 = 1;
           if (unlikely(__pyx_t_41 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_41);
-            __PYX_ERR(0, 156, __pyx_L1_error)
+            __PYX_ERR(0, 157, __pyx_L1_error)
           }
           __pyx_v_sigma = (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_sigmaMat.data + __pyx_t_42 * __pyx_v_sigmaMat.strides[0]) ) + __pyx_t_43 * __pyx_v_sigmaMat.strides[1]) )));
 
-          /* "hmm/hidden.pyx":157
+          /* "hmm/hidden.pyx":158
  *             beta_y_ = betas[(i+1),y_]
  *             sigma = sigmaMat[y,y_]
  *             tau = self._tau[(y_,x_i1)]             # <<<<<<<<<<<<<<
  *             expected_yy_[y,y_] += self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
  * 
  */
-          __pyx_t_12 = __Pyx_PyInt_From_long(__pyx_v_y_); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 157, __pyx_L1_error)
+          __pyx_t_12 = __Pyx_PyInt_From_long(__pyx_v_y_); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 158, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_12);
-          __pyx_t_6 = __Pyx_PyInt_From_long(__pyx_v_x_i1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 157, __pyx_L1_error)
+          __pyx_t_6 = __Pyx_PyInt_From_long(__pyx_v_x_i1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 158, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
-          __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 157, __pyx_L1_error)
+          __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 158, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_GIVEREF(__pyx_t_12);
           PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_12);
@@ -4568,21 +4571,21 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
           PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_6);
           __pyx_t_12 = 0;
           __pyx_t_6 = 0;
-          __pyx_t_6 = PyObject_GetItem(__pyx_v_self->_tau, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 157, __pyx_L1_error)
+          __pyx_t_6 = PyObject_GetItem(__pyx_v_self->_tau, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 158, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_27 = __pyx_PyFloat_AsDouble(__pyx_t_6); if (unlikely((__pyx_t_27 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 157, __pyx_L1_error)
+          __pyx_t_27 = __pyx_PyFloat_AsDouble(__pyx_t_6); if (unlikely((__pyx_t_27 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 158, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
           __pyx_v_tau = __pyx_t_27;
 
-          /* "hmm/hidden.pyx":158
+          /* "hmm/hidden.pyx":159
  *             sigma = sigmaMat[y,y_]
  *             tau = self._tau[(y_,x_i1)]
  *             expected_yy_[y,y_] += self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)             # <<<<<<<<<<<<<<
  * 
  *     return (expected_yx, expected_yy_, expected_ycirc) # return expectations
  */
-          __pyx_t_27 = __pyx_PyFloat_AsDouble(__pyx_v_beta_y_); if (unlikely((__pyx_t_27 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 158, __pyx_L1_error)
+          __pyx_t_27 = __pyx_PyFloat_AsDouble(__pyx_v_beta_y_); if (unlikely((__pyx_t_27 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 159, __pyx_L1_error)
           __pyx_t_44 = __pyx_v_y;
           __pyx_t_45 = __pyx_v_y_;
           __pyx_t_41 = -1;
@@ -4596,24 +4599,24 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
           } else if (unlikely(__pyx_t_45 >= __pyx_v_expected_yy_.shape[1])) __pyx_t_41 = 1;
           if (unlikely(__pyx_t_41 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_41);
-            __PYX_ERR(0, 158, __pyx_L1_error)
+            __PYX_ERR(0, 159, __pyx_L1_error)
           }
           *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_expected_yy_.data + __pyx_t_44 * __pyx_v_expected_yy_.strides[0]) ) + __pyx_t_45 * __pyx_v_expected_yy_.strides[1]) )) += ((struct __pyx_vtabstruct_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self->__pyx_vtab)->_expTransitionFreq(__pyx_v_self, __pyx_v_alpha_y, __pyx_t_27, __pyx_v_sigma, __pyx_v_tau, __pyx_v_totalProb);
         }
       }
     }
 
-    /* "hmm/hidden.pyx":113
+    /* "hmm/hidden.pyx":114
  *     s = 1
  *     n_sentence = len(self._sentences)
  *     for sentence in self._sentences:             # <<<<<<<<<<<<<<
- *       print "- sentence: %i of %i \t\t (iteration %i/%i)" % (s, n_sentence, iteration, iter_cap)
+ *       print "- sentence: %i of %i \t\t (iteration %i/%i)"%(s,n_sentence,iteration,iter_cap)
  *       s+=1
  */
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "hmm/hidden.pyx":160
+  /* "hmm/hidden.pyx":161
  *             expected_yy_[y,y_] += self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
  * 
  *     return (expected_yx, expected_yy_, expected_ycirc) # return expectations             # <<<<<<<<<<<<<<
@@ -4621,11 +4624,11 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
  *   """ Perform the M-Step of EM. Update sigma and tau mappings using expectations. """
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = __pyx_memoryview_fromslice(__pyx_v_expected_yy_, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __pyx_t_3 = __pyx_memoryview_fromslice(__pyx_v_expected_yy_, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 161, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_6 = __pyx_memoryview_fromslice(__pyx_v_expected_ycirc, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __pyx_t_6 = __pyx_memoryview_fromslice(__pyx_v_expected_ycirc, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 161, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 161, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_INCREF(__pyx_v_expected_yx);
   __Pyx_GIVEREF(__pyx_v_expected_yx);
@@ -4640,7 +4643,7 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
   __pyx_t_5 = 0;
   goto __pyx_L0;
 
-  /* "hmm/hidden.pyx":96
+  /* "hmm/hidden.pyx":97
  * 
  *   """ Perform the E-Step of EM. Return the expectations. """
  *   cdef tuple _do_EStep(self, int iteration, int iter_cap):             # <<<<<<<<<<<<<<
@@ -4689,7 +4692,7 @@ static PyObject *__pyx_f_3hmm_6hidden_13HiddenDataHMM__do_EStep(struct __pyx_obj
   return __pyx_r;
 }
 
-/* "hmm/hidden.pyx":163
+/* "hmm/hidden.pyx":164
  * 
  *   """ Perform the M-Step of EM. Update sigma and tau mappings using expectations. """
  *   cdef void _do_MStep(self, expected_yx, double[:,:] expected_yy_, double[:] expected_ycirc):             # <<<<<<<<<<<<<<
@@ -4728,7 +4731,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
   Py_ssize_t __pyx_t_21;
   __Pyx_RefNannySetupContext("_do_MStep", 0);
 
-  /* "hmm/hidden.pyx":164
+  /* "hmm/hidden.pyx":165
  *   """ Perform the M-Step of EM. Update sigma and tau mappings using expectations. """
  *   cdef void _do_MStep(self, expected_yx, double[:,:] expected_yy_, double[:] expected_ycirc):
  *     cdef double[:,:] sigmaMat = self._sigma # memoryview on numpy array             # <<<<<<<<<<<<<<
@@ -4736,12 +4739,12 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
  *     for y in range(0,self._numStates):
  */
   __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_v_self->_sigma);
-  if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 164, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 165, __pyx_L1_error)
   __pyx_v_sigmaMat = __pyx_t_1;
   __pyx_t_1.memview = NULL;
   __pyx_t_1.data = NULL;
 
-  /* "hmm/hidden.pyx":166
+  /* "hmm/hidden.pyx":167
  *     cdef double[:,:] sigmaMat = self._sigma # memoryview on numpy array
  *     cdef int y, yprime
  *     for y in range(0,self._numStates):             # <<<<<<<<<<<<<<
@@ -4752,7 +4755,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_y = __pyx_t_3;
 
-    /* "hmm/hidden.pyx":167
+    /* "hmm/hidden.pyx":168
  *     cdef int y, yprime
  *     for y in range(0,self._numStates):
  *       for yprime in range(0,self._numStates):             # <<<<<<<<<<<<<<
@@ -4763,7 +4766,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
     for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
       __pyx_v_yprime = __pyx_t_5;
 
-      /* "hmm/hidden.pyx":168
+      /* "hmm/hidden.pyx":169
  *     for y in range(0,self._numStates):
  *       for yprime in range(0,self._numStates):
  *         sigmaMat[y,yprime] = expected_yy_[y,yprime]/expected_ycirc[y]             # <<<<<<<<<<<<<<
@@ -4783,7 +4786,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
       } else if (unlikely(__pyx_t_7 >= __pyx_v_expected_yy_.shape[1])) __pyx_t_8 = 1;
       if (unlikely(__pyx_t_8 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_8);
-        __PYX_ERR(0, 168, __pyx_L1_error)
+        __PYX_ERR(0, 169, __pyx_L1_error)
       }
       __pyx_t_9 = (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_expected_yy_.data + __pyx_t_6 * __pyx_v_expected_yy_.strides[0]) ) + __pyx_t_7 * __pyx_v_expected_yy_.strides[1]) )));
       __pyx_t_10 = __pyx_v_y;
@@ -4794,12 +4797,12 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
       } else if (unlikely(__pyx_t_10 >= __pyx_v_expected_ycirc.shape[0])) __pyx_t_8 = 0;
       if (unlikely(__pyx_t_8 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_8);
-        __PYX_ERR(0, 168, __pyx_L1_error)
+        __PYX_ERR(0, 169, __pyx_L1_error)
       }
       __pyx_t_11 = (*((double *) ( /* dim=0 */ (__pyx_v_expected_ycirc.data + __pyx_t_10 * __pyx_v_expected_ycirc.strides[0]) )));
       if (unlikely(__pyx_t_11 == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-        __PYX_ERR(0, 168, __pyx_L1_error)
+        __PYX_ERR(0, 169, __pyx_L1_error)
       }
       __pyx_t_12 = __pyx_v_y;
       __pyx_t_13 = __pyx_v_yprime;
@@ -4814,13 +4817,13 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
       } else if (unlikely(__pyx_t_13 >= __pyx_v_sigmaMat.shape[1])) __pyx_t_8 = 1;
       if (unlikely(__pyx_t_8 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_8);
-        __PYX_ERR(0, 168, __pyx_L1_error)
+        __PYX_ERR(0, 169, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_sigmaMat.data + __pyx_t_12 * __pyx_v_sigmaMat.strides[0]) ) + __pyx_t_13 * __pyx_v_sigmaMat.strides[1]) )) = (__pyx_t_9 / __pyx_t_11);
     }
   }
 
-  /* "hmm/hidden.pyx":170
+  /* "hmm/hidden.pyx":171
  *         sigmaMat[y,yprime] = expected_yy_[y,yprime]/expected_ycirc[y]
  * 
  *     for emission,expectation in expected_yx.iteritems():             # <<<<<<<<<<<<<<
@@ -4830,9 +4833,9 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
   __pyx_t_15 = 0;
   if (unlikely(__pyx_v_expected_yx == Py_None)) {
     PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%s'", "iteritems");
-    __PYX_ERR(0, 170, __pyx_L1_error)
+    __PYX_ERR(0, 171, __pyx_L1_error)
   }
-  __pyx_t_17 = __Pyx_dict_iterator(__pyx_v_expected_yx, 0, __pyx_n_s_iteritems, (&__pyx_t_16), (&__pyx_t_2)); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_17 = __Pyx_dict_iterator(__pyx_v_expected_yx, 0, __pyx_n_s_iteritems, (&__pyx_t_16), (&__pyx_t_2)); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 171, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_17);
   __Pyx_XDECREF(__pyx_t_14);
   __pyx_t_14 = __pyx_t_17;
@@ -4840,7 +4843,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
   while (1) {
     __pyx_t_3 = __Pyx_dict_iter_next(__pyx_t_14, __pyx_t_16, &__pyx_t_15, &__pyx_t_17, &__pyx_t_18, NULL, __pyx_t_2);
     if (unlikely(__pyx_t_3 == 0)) break;
-    if (unlikely(__pyx_t_3 == -1)) __PYX_ERR(0, 170, __pyx_L1_error)
+    if (unlikely(__pyx_t_3 == -1)) __PYX_ERR(0, 171, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_17);
     __Pyx_GOTREF(__pyx_t_18);
     __Pyx_XDECREF_SET(__pyx_v_emission, __pyx_t_17);
@@ -4848,7 +4851,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
     __Pyx_XDECREF_SET(__pyx_v_expectation, __pyx_t_18);
     __pyx_t_18 = 0;
 
-    /* "hmm/hidden.pyx":171
+    /* "hmm/hidden.pyx":172
  * 
  *     for emission,expectation in expected_yx.iteritems():
  *       y, _ = emission             # <<<<<<<<<<<<<<
@@ -4865,7 +4868,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
       if (unlikely(size != 2)) {
         if (size > 2) __Pyx_RaiseTooManyValuesError(2);
         else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-        __PYX_ERR(0, 171, __pyx_L1_error)
+        __PYX_ERR(0, 172, __pyx_L1_error)
       }
       #if CYTHON_COMPILING_IN_CPYTHON
       if (likely(PyTuple_CheckExact(sequence))) {
@@ -4878,21 +4881,21 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
       __Pyx_INCREF(__pyx_t_18);
       __Pyx_INCREF(__pyx_t_17);
       #else
-      __pyx_t_18 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 171, __pyx_L1_error)
+      __pyx_t_18 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 172, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_18);
-      __pyx_t_17 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 171, __pyx_L1_error)
+      __pyx_t_17 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 172, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_17);
       #endif
     } else {
       Py_ssize_t index = -1;
-      __pyx_t_19 = PyObject_GetIter(__pyx_v_emission); if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 171, __pyx_L1_error)
+      __pyx_t_19 = PyObject_GetIter(__pyx_v_emission); if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 172, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_19);
       __pyx_t_20 = Py_TYPE(__pyx_t_19)->tp_iternext;
       index = 0; __pyx_t_18 = __pyx_t_20(__pyx_t_19); if (unlikely(!__pyx_t_18)) goto __pyx_L9_unpacking_failed;
       __Pyx_GOTREF(__pyx_t_18);
       index = 1; __pyx_t_17 = __pyx_t_20(__pyx_t_19); if (unlikely(!__pyx_t_17)) goto __pyx_L9_unpacking_failed;
       __Pyx_GOTREF(__pyx_t_17);
-      if (__Pyx_IternextUnpackEndCheck(__pyx_t_20(__pyx_t_19), 2) < 0) __PYX_ERR(0, 171, __pyx_L1_error)
+      if (__Pyx_IternextUnpackEndCheck(__pyx_t_20(__pyx_t_19), 2) < 0) __PYX_ERR(0, 172, __pyx_L1_error)
       __pyx_t_20 = NULL;
       __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
       goto __pyx_L10_unpacking_done;
@@ -4900,16 +4903,16 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
       __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
       __pyx_t_20 = NULL;
       if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-      __PYX_ERR(0, 171, __pyx_L1_error)
+      __PYX_ERR(0, 172, __pyx_L1_error)
       __pyx_L10_unpacking_done:;
     }
-    __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_18); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 171, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_18); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 172, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
     __pyx_v_y = __pyx_t_3;
     __Pyx_XDECREF_SET(__pyx_v__, __pyx_t_17);
     __pyx_t_17 = 0;
 
-    /* "hmm/hidden.pyx":172
+    /* "hmm/hidden.pyx":173
  *     for emission,expectation in expected_yx.iteritems():
  *       y, _ = emission
  *       self._tau[emission] = expectation/expected_ycirc[y]             # <<<<<<<<<<<<<<
@@ -4924,19 +4927,19 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
     } else if (unlikely(__pyx_t_21 >= __pyx_v_expected_ycirc.shape[0])) __pyx_t_3 = 0;
     if (unlikely(__pyx_t_3 != -1)) {
       __Pyx_RaiseBufferIndexError(__pyx_t_3);
-      __PYX_ERR(0, 172, __pyx_L1_error)
+      __PYX_ERR(0, 173, __pyx_L1_error)
     }
-    __pyx_t_17 = PyFloat_FromDouble((*((double *) ( /* dim=0 */ (__pyx_v_expected_ycirc.data + __pyx_t_21 * __pyx_v_expected_ycirc.strides[0]) )))); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 172, __pyx_L1_error)
+    __pyx_t_17 = PyFloat_FromDouble((*((double *) ( /* dim=0 */ (__pyx_v_expected_ycirc.data + __pyx_t_21 * __pyx_v_expected_ycirc.strides[0]) )))); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 173, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_17);
-    __pyx_t_18 = __Pyx_PyNumber_Divide(__pyx_v_expectation, __pyx_t_17); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 172, __pyx_L1_error)
+    __pyx_t_18 = __Pyx_PyNumber_Divide(__pyx_v_expectation, __pyx_t_17); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 173, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_18);
     __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
-    if (unlikely(PyObject_SetItem(__pyx_v_self->_tau, __pyx_v_emission, __pyx_t_18) < 0)) __PYX_ERR(0, 172, __pyx_L1_error)
+    if (unlikely(PyObject_SetItem(__pyx_v_self->_tau, __pyx_v_emission, __pyx_t_18) < 0)) __PYX_ERR(0, 173, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
   }
   __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-  /* "hmm/hidden.pyx":163
+  /* "hmm/hidden.pyx":164
  * 
  *   """ Perform the M-Step of EM. Update sigma and tau mappings using expectations. """
  *   cdef void _do_MStep(self, expected_yx, double[:,:] expected_yy_, double[:] expected_ycirc):             # <<<<<<<<<<<<<<
@@ -4961,7 +4964,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__do_MStep(struct __pyx_obj_3hmm
   __Pyx_RefNannyFinishContext();
 }
 
-/* "hmm/hidden.pyx":174
+/* "hmm/hidden.pyx":175
  *       self._tau[emission] = expectation/expected_ycirc[y]
  * 
  *   cdef void _train(self, int ITER_CAP, tuple start_distribution):             # <<<<<<<<<<<<<<
@@ -4984,16 +4987,16 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
   __Pyx_memviewslice __pyx_t_7 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("_train", 0);
 
-  /* "hmm/hidden.pyx":175
+  /* "hmm/hidden.pyx":176
  * 
  *   cdef void _train(self, int ITER_CAP, tuple start_distribution):
  *     print "Beginning train iterations (EM)..."             # <<<<<<<<<<<<<<
  *     if start_distribution:
  *       self._sigma, self._tau = start_distribution
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Beginning_train_iterations_EM) < 0) __PYX_ERR(0, 175, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Beginning_train_iterations_EM) < 0) __PYX_ERR(0, 176, __pyx_L1_error)
 
-  /* "hmm/hidden.pyx":176
+  /* "hmm/hidden.pyx":177
  *   cdef void _train(self, int ITER_CAP, tuple start_distribution):
  *     print "Beginning train iterations (EM)..."
  *     if start_distribution:             # <<<<<<<<<<<<<<
@@ -5003,7 +5006,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
   __pyx_t_1 = (__pyx_v_start_distribution != Py_None) && (PyTuple_GET_SIZE(__pyx_v_start_distribution) != 0);
   if (__pyx_t_1) {
 
-    /* "hmm/hidden.pyx":177
+    /* "hmm/hidden.pyx":178
  *     print "Beginning train iterations (EM)..."
  *     if start_distribution:
  *       self._sigma, self._tau = start_distribution             # <<<<<<<<<<<<<<
@@ -5020,7 +5023,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
       if (unlikely(size != 2)) {
         if (size > 2) __Pyx_RaiseTooManyValuesError(2);
         else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-        __PYX_ERR(0, 177, __pyx_L1_error)
+        __PYX_ERR(0, 178, __pyx_L1_error)
       }
       #if CYTHON_COMPILING_IN_CPYTHON
       __pyx_t_2 = PyTuple_GET_ITEM(sequence, 0); 
@@ -5028,13 +5031,13 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
       __Pyx_INCREF(__pyx_t_2);
       __Pyx_INCREF(__pyx_t_3);
       #else
-      __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 177, __pyx_L1_error)
+      __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 178, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 177, __pyx_L1_error)
+      __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       #endif
     } else {
-      __Pyx_RaiseNoneNotIterableError(); __PYX_ERR(0, 177, __pyx_L1_error)
+      __Pyx_RaiseNoneNotIterableError(); __PYX_ERR(0, 178, __pyx_L1_error)
     }
     __Pyx_GIVEREF(__pyx_t_2);
     __Pyx_GOTREF(__pyx_v_self->_sigma);
@@ -5047,7 +5050,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
     __pyx_v_self->_tau = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "hmm/hidden.pyx":176
+    /* "hmm/hidden.pyx":177
  *   cdef void _train(self, int ITER_CAP, tuple start_distribution):
  *     print "Beginning train iterations (EM)..."
  *     if start_distribution:             # <<<<<<<<<<<<<<
@@ -5056,7 +5059,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
  */
   }
 
-  /* "hmm/hidden.pyx":179
+  /* "hmm/hidden.pyx":180
  *       self._sigma, self._tau = start_distribution
  * 
  *     cdef int i = 1             # <<<<<<<<<<<<<<
@@ -5065,7 +5068,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
  */
   __pyx_v_i = 1;
 
-  /* "hmm/hidden.pyx":182
+  /* "hmm/hidden.pyx":183
  *     cdef double[:,:] e_yy_
  *     cdef double[:] e_ycirc
  *     while i <= ITER_CAP:             # <<<<<<<<<<<<<<
@@ -5076,29 +5079,29 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
     __pyx_t_1 = ((__pyx_v_i <= __pyx_v_ITER_CAP) != 0);
     if (!__pyx_t_1) break;
 
-    /* "hmm/hidden.pyx":183
+    /* "hmm/hidden.pyx":184
  *     cdef double[:] e_ycirc
  *     while i <= ITER_CAP:
  *       print "iteration %i" % i             # <<<<<<<<<<<<<<
  * 
  *       # (E-step):
  */
-    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_i); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 183, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_i); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 184, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyString_Format(__pyx_kp_s_iteration_i, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 183, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyString_Format(__pyx_kp_s_iteration_i, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 184, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 183, __pyx_L1_error)
+    if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 184, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "hmm/hidden.pyx":186
+    /* "hmm/hidden.pyx":187
  * 
  *       # (E-step):
  *       e_yx, e_yy_, e_ycirc = self._do_EStep(i, ITER_CAP)             # <<<<<<<<<<<<<<
  * 
  *       # (M-step): update sigma and tau
  */
-    __pyx_t_2 = ((struct __pyx_vtabstruct_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self->__pyx_vtab)->_do_EStep(__pyx_v_self, __pyx_v_i, __pyx_v_ITER_CAP); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 186, __pyx_L1_error)
+    __pyx_t_2 = ((struct __pyx_vtabstruct_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self->__pyx_vtab)->_do_EStep(__pyx_v_self, __pyx_v_i, __pyx_v_ITER_CAP); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 187, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     if (likely(__pyx_t_2 != Py_None)) {
       PyObject* sequence = __pyx_t_2;
@@ -5110,7 +5113,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
       if (unlikely(size != 3)) {
         if (size > 3) __Pyx_RaiseTooManyValuesError(3);
         else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-        __PYX_ERR(0, 186, __pyx_L1_error)
+        __PYX_ERR(0, 187, __pyx_L1_error)
       }
       #if CYTHON_COMPILING_IN_CPYTHON
       __pyx_t_3 = PyTuple_GET_ITEM(sequence, 0); 
@@ -5120,22 +5123,22 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
       __Pyx_INCREF(__pyx_t_4);
       __Pyx_INCREF(__pyx_t_5);
       #else
-      __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 186, __pyx_L1_error)
+      __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 187, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 186, __pyx_L1_error)
+      __pyx_t_4 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 187, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_5 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 186, __pyx_L1_error)
+      __pyx_t_5 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 187, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       #endif
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else {
-      __Pyx_RaiseNoneNotIterableError(); __PYX_ERR(0, 186, __pyx_L1_error)
+      __Pyx_RaiseNoneNotIterableError(); __PYX_ERR(0, 187, __pyx_L1_error)
     }
     __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_4);
-    if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 186, __pyx_L1_error)
+    if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 187, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_5);
-    if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 186, __pyx_L1_error)
+    if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 187, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_XDECREF_SET(__pyx_v_e_yx, __pyx_t_3);
     __pyx_t_3 = 0;
@@ -5148,7 +5151,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
     __pyx_t_7.memview = NULL;
     __pyx_t_7.data = NULL;
 
-    /* "hmm/hidden.pyx":189
+    /* "hmm/hidden.pyx":190
  * 
  *       # (M-step): update sigma and tau
  *       self._do_MStep(e_yx, e_yy_, e_ycirc)             # <<<<<<<<<<<<<<
@@ -5157,7 +5160,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
  */
     ((struct __pyx_vtabstruct_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self->__pyx_vtab)->_do_MStep(__pyx_v_self, __pyx_v_e_yx, __pyx_v_e_yy_, __pyx_v_e_ycirc);
 
-    /* "hmm/hidden.pyx":191
+    /* "hmm/hidden.pyx":192
  *       self._do_MStep(e_yx, e_yy_, e_ycirc)
  * 
  *       i += 1 # increment iterations count             # <<<<<<<<<<<<<<
@@ -5167,7 +5170,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
     __pyx_v_i = (__pyx_v_i + 1);
   }
 
-  /* "hmm/hidden.pyx":174
+  /* "hmm/hidden.pyx":175
  *       self._tau[emission] = expectation/expected_ycirc[y]
  * 
  *   cdef void _train(self, int ITER_CAP, tuple start_distribution):             # <<<<<<<<<<<<<<
@@ -5192,7 +5195,7 @@ static void __pyx_f_3hmm_6hidden_13HiddenDataHMM__train(struct __pyx_obj_3hmm_6h
   __Pyx_RefNannyFinishContext();
 }
 
-/* "hmm/hidden.pyx":197
+/* "hmm/hidden.pyx":198
  *                             initial distribution (or none to use random init)
  *   """
  *   def train(self, params):             # <<<<<<<<<<<<<<
@@ -5225,7 +5228,7 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_2train(struct __pyx_obj_3
   int __pyx_t_5;
   __Pyx_RefNannySetupContext("train", 0);
 
-  /* "hmm/hidden.pyx":198
+  /* "hmm/hidden.pyx":199
  *   """
  *   def train(self, params):
  *     iter_cap, start_distribution = params             # <<<<<<<<<<<<<<
@@ -5242,7 +5245,7 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_2train(struct __pyx_obj_3
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 198, __pyx_L1_error)
+      __PYX_ERR(0, 199, __pyx_L1_error)
     }
     #if CYTHON_COMPILING_IN_CPYTHON
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -5255,21 +5258,21 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_2train(struct __pyx_obj_3
     __Pyx_INCREF(__pyx_t_1);
     __Pyx_INCREF(__pyx_t_2);
     #else
-    __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 198, __pyx_L1_error)
+    __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 199, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 198, __pyx_L1_error)
+    __pyx_t_2 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 199, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     #endif
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_3 = PyObject_GetIter(__pyx_v_params); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 198, __pyx_L1_error)
+    __pyx_t_3 = PyObject_GetIter(__pyx_v_params); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 199, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_4 = Py_TYPE(__pyx_t_3)->tp_iternext;
     index = 0; __pyx_t_1 = __pyx_t_4(__pyx_t_3); if (unlikely(!__pyx_t_1)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_1);
     index = 1; __pyx_t_2 = __pyx_t_4(__pyx_t_3); if (unlikely(!__pyx_t_2)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_2);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_4(__pyx_t_3), 2) < 0) __PYX_ERR(0, 198, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_4(__pyx_t_3), 2) < 0) __PYX_ERR(0, 199, __pyx_L1_error)
     __pyx_t_4 = NULL;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     goto __pyx_L4_unpacking_done;
@@ -5277,7 +5280,7 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_2train(struct __pyx_obj_3
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_4 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 198, __pyx_L1_error)
+    __PYX_ERR(0, 199, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __pyx_v_iter_cap = __pyx_t_1;
@@ -5285,36 +5288,36 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_2train(struct __pyx_obj_3
   __pyx_v_start_distribution = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "hmm/hidden.pyx":199
+  /* "hmm/hidden.pyx":200
  *   def train(self, params):
  *     iter_cap, start_distribution = params
  *     print self._sigma             # <<<<<<<<<<<<<<
  *     self._train(iter_cap, start_distribution)
  *     print self._sigma
  */
-  if (__Pyx_PrintOne(0, __pyx_v_self->_sigma) < 0) __PYX_ERR(0, 199, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_v_self->_sigma) < 0) __PYX_ERR(0, 200, __pyx_L1_error)
 
-  /* "hmm/hidden.pyx":200
+  /* "hmm/hidden.pyx":201
  *     iter_cap, start_distribution = params
  *     print self._sigma
  *     self._train(iter_cap, start_distribution)             # <<<<<<<<<<<<<<
  *     print self._sigma
  * 
  */
-  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_iter_cap); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 200, __pyx_L1_error)
-  if (!(likely(PyTuple_CheckExact(__pyx_v_start_distribution))||((__pyx_v_start_distribution) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "tuple", Py_TYPE(__pyx_v_start_distribution)->tp_name), 0))) __PYX_ERR(0, 200, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_iter_cap); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 201, __pyx_L1_error)
+  if (!(likely(PyTuple_CheckExact(__pyx_v_start_distribution))||((__pyx_v_start_distribution) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "tuple", Py_TYPE(__pyx_v_start_distribution)->tp_name), 0))) __PYX_ERR(0, 201, __pyx_L1_error)
   ((struct __pyx_vtabstruct_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self->__pyx_vtab)->_train(__pyx_v_self, __pyx_t_5, ((PyObject*)__pyx_v_start_distribution));
 
-  /* "hmm/hidden.pyx":201
+  /* "hmm/hidden.pyx":202
  *     print self._sigma
  *     self._train(iter_cap, start_distribution)
  *     print self._sigma             # <<<<<<<<<<<<<<
  * 
- *   def getSigma(self, y, yprime):
+ *   """ Return sigma_{y,yprime} - transition prob. from state y->yprime """
  */
-  if (__Pyx_PrintOne(0, __pyx_v_self->_sigma) < 0) __PYX_ERR(0, 201, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_v_self->_sigma) < 0) __PYX_ERR(0, 202, __pyx_L1_error)
 
-  /* "hmm/hidden.pyx":197
+  /* "hmm/hidden.pyx":198
  *                             initial distribution (or none to use random init)
  *   """
  *   def train(self, params):             # <<<<<<<<<<<<<<
@@ -5339,9 +5342,9 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_2train(struct __pyx_obj_3
   return __pyx_r;
 }
 
-/* "hmm/hidden.pyx":203
- *     print self._sigma
+/* "hmm/hidden.pyx":205
  * 
+ *   """ Return sigma_{y,yprime} - transition prob. from state y->yprime """
  *   def getSigma(self, y, yprime):             # <<<<<<<<<<<<<<
  *     y = self._labelHash[y]
  *     yprime = self._labelHash[yprime]
@@ -5375,11 +5378,11 @@ static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_5getSigma(PyObject *__pyx
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_yprime)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("getSigma", 1, 2, 2, 1); __PYX_ERR(0, 203, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("getSigma", 1, 2, 2, 1); __PYX_ERR(0, 205, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "getSigma") < 0)) __PYX_ERR(0, 203, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "getSigma") < 0)) __PYX_ERR(0, 205, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -5392,7 +5395,7 @@ static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_5getSigma(PyObject *__pyx
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("getSigma", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 203, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("getSigma", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 205, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("hmm.hidden.HiddenDataHMM.getSigma", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5414,39 +5417,39 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_4getSigma(struct __pyx_ob
   __Pyx_INCREF(__pyx_v_y);
   __Pyx_INCREF(__pyx_v_yprime);
 
-  /* "hmm/hidden.pyx":204
- * 
+  /* "hmm/hidden.pyx":206
+ *   """ Return sigma_{y,yprime} - transition prob. from state y->yprime """
  *   def getSigma(self, y, yprime):
  *     y = self._labelHash[y]             # <<<<<<<<<<<<<<
  *     yprime = self._labelHash[yprime]
  *     return self._sigma[y,yprime]
  */
-  __pyx_t_1 = PyObject_GetItem(__pyx_v_self->_labelHash, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 204, __pyx_L1_error)
+  __pyx_t_1 = PyObject_GetItem(__pyx_v_self->_labelHash, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 206, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF_SET(__pyx_v_y, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hmm/hidden.pyx":205
+  /* "hmm/hidden.pyx":207
  *   def getSigma(self, y, yprime):
  *     y = self._labelHash[y]
  *     yprime = self._labelHash[yprime]             # <<<<<<<<<<<<<<
  *     return self._sigma[y,yprime]
  * 
  */
-  __pyx_t_1 = PyObject_GetItem(__pyx_v_self->_labelHash, __pyx_v_yprime); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_1 = PyObject_GetItem(__pyx_v_self->_labelHash, __pyx_v_yprime); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 207, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF_SET(__pyx_v_yprime, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hmm/hidden.pyx":206
+  /* "hmm/hidden.pyx":208
  *     y = self._labelHash[y]
  *     yprime = self._labelHash[yprime]
  *     return self._sigma[y,yprime]             # <<<<<<<<<<<<<<
  * 
- *   def getTau(self, y, x):
+ *   """ Compute tau_{y,x} - emission prob. of state y->output x """
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 206, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_v_y);
   __Pyx_GIVEREF(__pyx_v_y);
@@ -5454,16 +5457,16 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_4getSigma(struct __pyx_ob
   __Pyx_INCREF(__pyx_v_yprime);
   __Pyx_GIVEREF(__pyx_v_yprime);
   PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_yprime);
-  __pyx_t_2 = PyObject_GetItem(__pyx_v_self->_sigma, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 206, __pyx_L1_error)
+  __pyx_t_2 = PyObject_GetItem(__pyx_v_self->_sigma, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "hmm/hidden.pyx":203
- *     print self._sigma
+  /* "hmm/hidden.pyx":205
  * 
+ *   """ Return sigma_{y,yprime} - transition prob. from state y->yprime """
  *   def getSigma(self, y, yprime):             # <<<<<<<<<<<<<<
  *     y = self._labelHash[y]
  *     yprime = self._labelHash[yprime]
@@ -5483,9 +5486,9 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_4getSigma(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "hmm/hidden.pyx":208
- *     return self._sigma[y,yprime]
+/* "hmm/hidden.pyx":211
  * 
+ *   """ Compute tau_{y,x} - emission prob. of state y->output x """
  *   def getTau(self, y, x):             # <<<<<<<<<<<<<<
  *     y = self._labelHash[y]
  *     x = hash(x)
@@ -5519,11 +5522,11 @@ static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_7getTau(PyObject *__pyx_v
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("getTau", 1, 2, 2, 1); __PYX_ERR(0, 208, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("getTau", 1, 2, 2, 1); __PYX_ERR(0, 211, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "getTau") < 0)) __PYX_ERR(0, 208, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "getTau") < 0)) __PYX_ERR(0, 211, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -5536,7 +5539,7 @@ static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_7getTau(PyObject *__pyx_v
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("getTau", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 208, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("getTau", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 211, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("hmm.hidden.HiddenDataHMM.getTau", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5559,40 +5562,40 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_6getTau(struct __pyx_obj_
   __Pyx_INCREF(__pyx_v_y);
   __Pyx_INCREF(__pyx_v_x);
 
-  /* "hmm/hidden.pyx":209
- * 
+  /* "hmm/hidden.pyx":212
+ *   """ Compute tau_{y,x} - emission prob. of state y->output x """
  *   def getTau(self, y, x):
  *     y = self._labelHash[y]             # <<<<<<<<<<<<<<
  *     x = hash(x)
  *     return self._tau[(y,x)]
  */
-  __pyx_t_1 = PyObject_GetItem(__pyx_v_self->_labelHash, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 209, __pyx_L1_error)
+  __pyx_t_1 = PyObject_GetItem(__pyx_v_self->_labelHash, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 212, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF_SET(__pyx_v_y, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hmm/hidden.pyx":210
+  /* "hmm/hidden.pyx":213
  *   def getTau(self, y, x):
  *     y = self._labelHash[y]
  *     x = hash(x)             # <<<<<<<<<<<<<<
  *     return self._tau[(y,x)]
  * 
  */
-  __pyx_t_2 = PyObject_Hash(__pyx_v_x); if (unlikely(__pyx_t_2 == -1)) __PYX_ERR(0, 210, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_PyInt_FromHash_t(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 210, __pyx_L1_error)
+  __pyx_t_2 = PyObject_Hash(__pyx_v_x); if (unlikely(__pyx_t_2 == -1)) __PYX_ERR(0, 213, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromHash_t(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 213, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF_SET(__pyx_v_x, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hmm/hidden.pyx":211
+  /* "hmm/hidden.pyx":214
  *     y = self._labelHash[y]
  *     x = hash(x)
  *     return self._tau[(y,x)]             # <<<<<<<<<<<<<<
  * 
- *   def getState(self, tag): # Return the internal state value corresponding to the given POS tag
+ *   """ Return a copy of the model's labels """
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 211, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 214, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_v_y);
   __Pyx_GIVEREF(__pyx_v_y);
@@ -5600,16 +5603,16 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_6getTau(struct __pyx_obj_
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
   PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_x);
-  __pyx_t_3 = PyObject_GetItem(__pyx_v_self->_tau, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 211, __pyx_L1_error)
+  __pyx_t_3 = PyObject_GetItem(__pyx_v_self->_tau, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 214, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "hmm/hidden.pyx":208
- *     return self._sigma[y,yprime]
+  /* "hmm/hidden.pyx":211
  * 
+ *   """ Compute tau_{y,x} - emission prob. of state y->output x """
  *   def getTau(self, y, x):             # <<<<<<<<<<<<<<
  *     y = self._labelHash[y]
  *     x = hash(x)
@@ -5629,88 +5632,28 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_6getTau(struct __pyx_obj_
   return __pyx_r;
 }
 
-/* "hmm/hidden.pyx":213
- *     return self._tau[(y,x)]
+/* "hmm/hidden.pyx":217
  * 
- *   def getState(self, tag): # Return the internal state value corresponding to the given POS tag             # <<<<<<<<<<<<<<
- *     return self._labelHash[tag]
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_9getState(PyObject *__pyx_v_self, PyObject *__pyx_v_tag); /*proto*/
-static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_9getState(PyObject *__pyx_v_self, PyObject *__pyx_v_tag) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("getState (wrapper)", 0);
-  __pyx_r = __pyx_pf_3hmm_6hidden_13HiddenDataHMM_8getState(((struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self), ((PyObject *)__pyx_v_tag));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_8getState(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self, PyObject *__pyx_v_tag) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  __Pyx_RefNannySetupContext("getState", 0);
-
-  /* "hmm/hidden.pyx":214
- * 
- *   def getState(self, tag): # Return the internal state value corresponding to the given POS tag
- *     return self._labelHash[tag]             # <<<<<<<<<<<<<<
- * 
- *   def getLabels(self):
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyObject_GetItem(__pyx_v_self->_labelHash, __pyx_v_tag); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 214, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "hmm/hidden.pyx":213
- *     return self._tau[(y,x)]
- * 
- *   def getState(self, tag): # Return the internal state value corresponding to the given POS tag             # <<<<<<<<<<<<<<
- *     return self._labelHash[tag]
- * 
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("hmm.hidden.HiddenDataHMM.getState", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "hmm/hidden.pyx":216
- *     return self._labelHash[tag]
- * 
+ *   """ Return a copy of the model's labels """
  *   def getLabels(self):             # <<<<<<<<<<<<<<
- *     return self._labelHash.keys()
+ *     return set(self._labelHash.keys())
  * 
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_11getLabels(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_11getLabels(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_9getLabels(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_9getLabels(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("getLabels (wrapper)", 0);
-  __pyx_r = __pyx_pf_3hmm_6hidden_13HiddenDataHMM_10getLabels(((struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self));
+  __pyx_r = __pyx_pf_3hmm_6hidden_13HiddenDataHMM_8getLabels(((struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_10getLabels(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self) {
+static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_8getLabels(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -5718,14 +5661,15 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_10getLabels(struct __pyx_
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("getLabels", 0);
 
-  /* "hmm/hidden.pyx":217
- * 
+  /* "hmm/hidden.pyx":218
+ *   """ Return a copy of the model's labels """
  *   def getLabels(self):
- *     return self._labelHash.keys()             # <<<<<<<<<<<<<<
+ *     return set(self._labelHash.keys())             # <<<<<<<<<<<<<<
  * 
+ *   """ Return a copy of the internal mapping of str y -> int i """
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self->_labelHash, __pyx_n_s_keys); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 217, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self->_labelHash, __pyx_n_s_keys); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 218, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
@@ -5738,22 +5682,25 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_10getLabels(struct __pyx_
     }
   }
   if (__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 217, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 218, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 217, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 218, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
+  __pyx_t_2 = PySet_New(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 218, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_r = __pyx_t_2;
+  __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "hmm/hidden.pyx":216
- *     return self._labelHash[tag]
+  /* "hmm/hidden.pyx":217
  * 
+ *   """ Return a copy of the model's labels """
  *   def getLabels(self):             # <<<<<<<<<<<<<<
- *     return self._labelHash.keys()
+ *     return set(self._labelHash.keys())
  * 
  */
 
@@ -5763,6 +5710,183 @@ static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_10getLabels(struct __pyx_
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_AddTraceback("hmm.hidden.HiddenDataHMM.getLabels", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "hmm/hidden.pyx":221
+ * 
+ *   """ Return a copy of the internal mapping of str y -> int i """
+ *   def getLabelHash(self):             # <<<<<<<<<<<<<<
+ *     return dict(self._labelHash)
+ * 
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_11getLabelHash(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_11getLabelHash(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("getLabelHash (wrapper)", 0);
+  __pyx_r = __pyx_pf_3hmm_6hidden_13HiddenDataHMM_10getLabelHash(((struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_10getLabelHash(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  __Pyx_RefNannySetupContext("getLabelHash", 0);
+
+  /* "hmm/hidden.pyx":222
+ *   """ Return a copy of the internal mapping of str y -> int i """
+ *   def getLabelHash(self):
+ *     return dict(self._labelHash)             # <<<<<<<<<<<<<<
+ * 
+ *   """ Return a copy of the trained internal distributions sigma and tau """
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 222, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_INCREF(__pyx_v_self->_labelHash);
+  __Pyx_GIVEREF(__pyx_v_self->_labelHash);
+  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_v_self->_labelHash);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)(&PyDict_Type)), __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 222, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_r = __pyx_t_2;
+  __pyx_t_2 = 0;
+  goto __pyx_L0;
+
+  /* "hmm/hidden.pyx":221
+ * 
+ *   """ Return a copy of the internal mapping of str y -> int i """
+ *   def getLabelHash(self):             # <<<<<<<<<<<<<<
+ *     return dict(self._labelHash)
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("hmm.hidden.HiddenDataHMM.getLabelHash", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "hmm/hidden.pyx":225
+ * 
+ *   """ Return a copy of the trained internal distributions sigma and tau """
+ *   def getDistribution(self):             # <<<<<<<<<<<<<<
+ *     return (np.copy(self._sigma), dict(self._tau))
+ * 
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_13getDistribution(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_3hmm_6hidden_13HiddenDataHMM_13getDistribution(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("getDistribution (wrapper)", 0);
+  __pyx_r = __pyx_pf_3hmm_6hidden_13HiddenDataHMM_12getDistribution(((struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_3hmm_6hidden_13HiddenDataHMM_12getDistribution(struct __pyx_obj_3hmm_6hidden_HiddenDataHMM *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  __Pyx_RefNannySetupContext("getDistribution", 0);
+
+  /* "hmm/hidden.pyx":226
+ *   """ Return a copy of the trained internal distributions sigma and tau """
+ *   def getDistribution(self):
+ *     return (np.copy(self._sigma), dict(self._tau))             # <<<<<<<<<<<<<<
+ * 
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 226, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_copy); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 226, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = NULL;
+  if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_2)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+    }
+  }
+  if (!__pyx_t_2) {
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_self->_sigma); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 226, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+  } else {
+    __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 226, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2); __pyx_t_2 = NULL;
+    __Pyx_INCREF(__pyx_v_self->_sigma);
+    __Pyx_GIVEREF(__pyx_v_self->_sigma);
+    PyTuple_SET_ITEM(__pyx_t_4, 0+1, __pyx_v_self->_sigma);
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 226, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  }
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 226, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_INCREF(__pyx_v_self->_tau);
+  __Pyx_GIVEREF(__pyx_v_self->_tau);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_v_self->_tau);
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)(&PyDict_Type)), __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 226, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 226, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_4);
+  __pyx_t_1 = 0;
+  __pyx_t_4 = 0;
+  __pyx_r = __pyx_t_3;
+  __pyx_t_3 = 0;
+  goto __pyx_L0;
+
+  /* "hmm/hidden.pyx":225
+ * 
+ *   """ Return a copy of the trained internal distributions sigma and tau """
+ *   def getDistribution(self):             # <<<<<<<<<<<<<<
+ *     return (np.copy(self._sigma), dict(self._tau))
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("hmm.hidden.HiddenDataHMM.getDistribution", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -20230,8 +20354,9 @@ static PyMethodDef __pyx_methods_3hmm_6hidden_HiddenDataHMM[] = {
   {"train", (PyCFunction)__pyx_pw_3hmm_6hidden_13HiddenDataHMM_3train, METH_O, 0},
   {"getSigma", (PyCFunction)__pyx_pw_3hmm_6hidden_13HiddenDataHMM_5getSigma, METH_VARARGS|METH_KEYWORDS, 0},
   {"getTau", (PyCFunction)__pyx_pw_3hmm_6hidden_13HiddenDataHMM_7getTau, METH_VARARGS|METH_KEYWORDS, 0},
-  {"getState", (PyCFunction)__pyx_pw_3hmm_6hidden_13HiddenDataHMM_9getState, METH_O, 0},
-  {"getLabels", (PyCFunction)__pyx_pw_3hmm_6hidden_13HiddenDataHMM_11getLabels, METH_NOARGS, 0},
+  {"getLabels", (PyCFunction)__pyx_pw_3hmm_6hidden_13HiddenDataHMM_9getLabels, METH_NOARGS, 0},
+  {"getLabelHash", (PyCFunction)__pyx_pw_3hmm_6hidden_13HiddenDataHMM_11getLabelHash, METH_NOARGS, 0},
+  {"getDistribution", (PyCFunction)__pyx_pw_3hmm_6hidden_13HiddenDataHMM_13getDistribution, METH_NOARGS, 0},
   {0, 0, 0, 0}
 };
 
@@ -21024,6 +21149,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_common_2, __pyx_k_common_2, sizeof(__pyx_k_common_2), 0, 0, 1, 1},
   {&__pyx_kp_s_contiguous_and_direct, __pyx_k_contiguous_and_direct, sizeof(__pyx_k_contiguous_and_direct), 0, 0, 1, 0},
   {&__pyx_kp_s_contiguous_and_indirect, __pyx_k_contiguous_and_indirect, sizeof(__pyx_k_contiguous_and_indirect), 0, 0, 1, 0},
+  {&__pyx_n_s_copy, __pyx_k_copy, sizeof(__pyx_k_copy), 0, 0, 1, 1},
   {&__pyx_n_s_defaultdict, __pyx_k_defaultdict, sizeof(__pyx_k_defaultdict), 0, 0, 1, 1},
   {&__pyx_n_s_dtype_is_object, __pyx_k_dtype_is_object, sizeof(__pyx_k_dtype_is_object), 0, 0, 1, 1},
   {&__pyx_n_s_encode, __pyx_k_encode, sizeof(__pyx_k_encode), 0, 0, 1, 1},
@@ -21097,9 +21223,9 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
 static int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 20, __pyx_L1_error)
   #if PY_MAJOR_VERSION >= 3
-  __pyx_builtin_xrange = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_xrange) __PYX_ERR(0, 129, __pyx_L1_error)
+  __pyx_builtin_xrange = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_xrange) __PYX_ERR(0, 130, __pyx_L1_error)
   #else
-  __pyx_builtin_xrange = __Pyx_GetBuiltinName(__pyx_n_s_xrange); if (!__pyx_builtin_xrange) __PYX_ERR(0, 129, __pyx_L1_error)
+  __pyx_builtin_xrange = __Pyx_GetBuiltinName(__pyx_n_s_xrange); if (!__pyx_builtin_xrange) __PYX_ERR(0, 130, __pyx_L1_error)
   #endif
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 218, __pyx_L1_error)
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) __PYX_ERR(1, 799, __pyx_L1_error)
@@ -21129,53 +21255,53 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "hmm/hidden.pyx":126
+  /* "hmm/hidden.pyx":127
  *       # e.g. [STOP, "hello", "world", STOP]
  *       # Calculate alpha and beta using our sigmas and taus
  *       alphas = alphaBetaMat[ALPHA,:,:]             # <<<<<<<<<<<<<<
  *       betas = alphaBetaMat[BETA,:,:]
  * 
  */
-  __pyx_slice__2 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__2)) __PYX_ERR(0, 126, __pyx_L1_error)
+  __pyx_slice__2 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__2)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_slice__2);
   __Pyx_GIVEREF(__pyx_slice__2);
-  __pyx_slice__3 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__3)) __PYX_ERR(0, 126, __pyx_L1_error)
+  __pyx_slice__3 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__3)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_slice__3);
   __Pyx_GIVEREF(__pyx_slice__3);
 
-  /* "hmm/hidden.pyx":127
+  /* "hmm/hidden.pyx":128
  *       # Calculate alpha and beta using our sigmas and taus
  *       alphas = alphaBetaMat[ALPHA,:,:]
  *       betas = alphaBetaMat[BETA,:,:]             # <<<<<<<<<<<<<<
  * 
  *       for i in xrange(1,n):
  */
-  __pyx_slice__4 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__4)) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_slice__4 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__4)) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_slice__4);
   __Pyx_GIVEREF(__pyx_slice__4);
-  __pyx_slice__5 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__5)) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_slice__5 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__5)) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_slice__5);
   __Pyx_GIVEREF(__pyx_slice__5);
 
-  /* "hmm/hidden.pyx":139
+  /* "hmm/hidden.pyx":140
  *         self._normaliseAlphaBeta(alphas[i], betas[i])
  *         if self._verifyProbs(alphas[i], betas[i], betas[0][STOPTAGIDX]) == 0:
  *           sys.stderr.write("Probabilities not valid!\n")             # <<<<<<<<<<<<<<
  *           return (None,None,None)
  * 
  */
-  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_s_Probabilities_not_valid); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 139, __pyx_L1_error)
+  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_s_Probabilities_not_valid); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
 
-  /* "hmm/hidden.pyx":140
+  /* "hmm/hidden.pyx":141
  *         if self._verifyProbs(alphas[i], betas[i], betas[0][STOPTAGIDX]) == 0:
  *           sys.stderr.write("Probabilities not valid!\n")
  *           return (None,None,None)             # <<<<<<<<<<<<<<
  * 
  *       # Here we go again, now to calculate expectations
  */
-  __pyx_tuple__7 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 140, __pyx_L1_error)
+  __pyx_tuple__7 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 141, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 

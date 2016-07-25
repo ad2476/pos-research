@@ -100,3 +100,11 @@ class VisibleDataHMM:
   def getLabels(self):
     return set(self.tagset)
 
+  """ Return a copy of the internal mapping of str y -> int i """
+  def getLabelHash(self):
+    return dict(self._labelHash)
+
+  """ Return a copy of the trained internal distributions sigma and tau """
+  def getDistribution(self):
+    return (np.copy(self._sigma), dict(self._tau))
+

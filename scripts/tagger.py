@@ -124,14 +124,16 @@ if __name__ == '__main__':
     visibleModel = hmm.VisibleDataHMM(words, tags, counts) # now we have a visible model
     visibleModel.train() # build the counts from the visible model
 
-    params = (iter_cap, (visibleModel.sigma, visibleModel.tau))     
+    params = (iter_cap, visibleModel.getDistribution())
     if not args.extra: # make sure the user has specified this option
       sys.stderr.write("--extra must be specified if --model=semisuper\n")
       sys.exit(1)
 
     unlabeledData = buildCorpus(args.extra)
-    extraWords = FilePreparser(unlabeledData).parseWords()
-    model = hmm.HiddenDataHMM(extraWords, visibleModel.getLabels()) # now we have a hidden model
+    extraWords = FilePreparser(unlabeledData).parseWords() # preparse unlabeled data
+    tagset = visibleModel.getLabels() # get the tags from visible data
+    # pass along the label hash from the visible model to our hidden model:
+    model = hmm.HiddenDataHMM(extraWords, tagset, visibleModel.getLabelHash())
 
   model.train(params) # train our model with the given training parameters
 

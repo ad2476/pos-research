@@ -229,7 +229,7 @@ NC_n_2.1
 N_s_4.3
 PUN_LV
 SNN_p_4.1
-**@sToP@**
+0
 UPA_A_li~gVi_1.1
 SAM_p_7.1
 NK_p_8.1

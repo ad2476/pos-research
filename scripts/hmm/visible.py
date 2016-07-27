@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from collections import defaultdict
 import itertools
 import numpy as np
@@ -104,7 +106,7 @@ class VisibleDataHMM:
   def getLabelHash(self):
     return dict(self._labelHash)
 
-  """ Return a copy of the trained internal distributions sigma and tau """
+  """ Return the trained internal distributions sigma and tau """
   def getDistribution(self):
-    return (np.copy(self._sigma), dict(self._tau))
+    return (self._sigma, self._tau)
 

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from collections import defaultdict
 import numpy as np
 cimport numpy as np
@@ -8,7 +10,7 @@ from . import STOP
 
 """ A Hidden Markov Model constructed from hidden (unlabeled) data """
 cdef class HiddenDataHMM:
-  cdef public _sentences, _states, _labelHash, _sigma, _tau
+  cdef public _sentences, _states, _labelHash, _sigma, _tau, _smooth
   cdef int _ITER_CAP, _numStates
   cdef public int unkCount, _STOPTAG
 
@@ -19,13 +21,18 @@ cdef class HiddenDataHMM:
     self._numStates = len(posLabels)
     self._states = range(0, self._numStates) # faster np.array indexing
 
+    # labelHash maps the string label name to an internal int index
     self._labelHash = labelHash or common.makeLabelHash(posLabels)
 
     self._STOPTAG = self._labelHash[STOP] # which one is the stop tag?
 
+    # initialise sigmas as random matrix
     randMat = np.random.uniform(0.9,1.1,[self._numStates]*2)
-    self._sigma = np.full([self._numStates]*2, 0.1)*randMat # [y,y']->prob
-    self._tau = defaultdict(lambda: 0.01*np.random.uniform(0.95,1.05))
+    self._sigma = np.full([self._numStates]*2, 0.1)*randMat # [y,y']->proba
+
+    # initialise tau as defaultdict with random initialisation (default)
+    self._smooth = lambda: 0.01*np.random.uniform(0.95,1.05)
+    self._tau = defaultdict(self._smooth)
 
     self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)
 
@@ -127,14 +134,14 @@ cdef class HiddenDataHMM:
       alphas = alphaBetaMat[ALPHA,:,:]
       betas = alphaBetaMat[BETA,:,:]
 
-      for i in xrange(1,n):
+      for i in xrange(1,n): # compute fwd/backward probs
         j = n - i - 1
         x_i = sentence[i]
         x_j1 = sentence[j+1]
         self._computeAlphasTimestep(sigmaMat, alphas, i, x_i) # compute alphas for this timestep
         self._computeBetasTimestep(sigmaMat, betas, j, x_j1) # compute betas for this timestep
 
-      for i in xrange(0,n):
+      for i in xrange(0,n): # normalise fwd/backward probs
         self._normaliseAlphaBeta(alphas[i], betas[i])
         #if self._verifyProbs(alphas[i], betas[i], betas[0][STOPTAGIDX]) == 0:
         #  sys.stderr.write("Probabilities not valid!\n")
@@ -148,6 +155,7 @@ cdef class HiddenDataHMM:
           alpha_y = alphas[i,y]
           beta_y = betas[i,y]
           totalProb = alphas[(n-1),STOPTAGIDX]
+
           expOutputFreq = self._expEmissionFreq(alpha_y, beta_y, totalProb)
           expected_yx[(y,x_i)] += expOutputFreq
           expected_ycirc[y] += expOutputFreq
@@ -176,6 +184,7 @@ cdef class HiddenDataHMM:
     print "Beginning train iterations (EM)..."
     if start_distribution:
       self._sigma, self._tau = start_distribution
+      self._tau.default_factory = self._smooth # use smoothing function for unknown emissions
 
     cdef int i = 1
     cdef double[:,:] e_yy_

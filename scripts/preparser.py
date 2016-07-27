@@ -60,6 +60,15 @@ class EnglishWSJParser(AbstractPreparser):
   def getSentenceTags(self, line):
     return line.split()[1::2]
 
+  def writeCorpusWithoutTags(self, out):
+    f = open(out, 'w')
+    for line in self._rawdata:
+      words = self.getSentenceWords(line)
+      for word in words:
+        f.write("%s "%word)
+      f.write("\n")
+    f.close()
+
   @staticmethod
   def formatOutput(words, tags):
     output = ""

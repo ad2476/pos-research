@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
   model.train(params) # train our model with the given training parameters
 
-  W_size = len(counts) # unique word types
+  #W_size = len(counts) # unique word types
   #print str(W_size) + " unique words, " + str(len(model.getLabels())) + " labels"
 
   viterbi = decoder.ViterbiDecoder(model, counts)

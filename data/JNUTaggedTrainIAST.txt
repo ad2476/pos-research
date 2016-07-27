@@ -67,7 +67,7 @@ manaścakṣurvihīnasya[NC_p_6.1] kīdṛśam[SNP_n_1.1] jīvitam[N_n_1.1] bhav
 kimapi[SNC_n_1.1] apūrvam[NVI_n_1.1] rūpakam[N_n_1.1] abhinetavyam[UPA_KVI1_n_1.1] /[PUN_VV]
 rājā[N_p_1.1] niḥśvasya[AVL] kimapi[SNC_n_1.1] dhyāyan[KV1_p_1.1] tiṣṭhati[P_laTV_1.1] /[PUN_VV]
 kasyacit[SNC_p_6.1] gṛhamedhinaḥ[NC_p_6.1] gṛhāt[N_p_5.1] annam[N_n_2.1] ānīya[AVL] bhavatīm[SNM_s_2.1] bhojayitum[Ni_AVT] icchāmi[P_laTV_3.1] /[PUN_VV]
-kasyāpi[SNC_p_6.1] bādhā[N_s_1.1 mā[AVN] bhūt[P_lu~NB_1.1] /[PUN_VV]
+kasyāpi[SNC_p_6.1] bādhā[N_s_1.1] mā[AVN] bhūt[P_lu~NB_1.1] /[PUN_VV]
 tatra[AV] muniḥ[N_p_1.1] kañcana[SNC_p_2.1] pradeśam[N_p_2.1] pradarśayan[UPA_Ni_KV1_p_1.1] avocat[P_l] /[PUN_VV]
 kasyacit[SNC_p_6.1] yakṣaḥ[N_p_1.1] rāmagiryāśrameṣu[NA_p_7.3] vasatim[N_s_2.1] cakre[P_liTB_1.1] /[PUN_VV]
 asti[P_laTV_1.1] kasmiṃścat[SNC_P_7.1] vanoddeśe[NC_p_7.1] kaścit[SNC_p_1.1] pulindaḥ[N_p_1.1] /[PUN_VV]

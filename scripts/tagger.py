@@ -124,7 +124,7 @@ if __name__ == '__main__':
     visibleModel = hmm.VisibleDataHMM(words, tags, counts) # now we have a visible model
     visibleModel.train() # build the counts from the visible model
 
-    params = (iter_cap, visibleModel.getDistribution())
+    params = (iter_cap, (visibleModel.getDistribution(), visibleModel.getVisibleCounts()))
     if not args.extra: # make sure the user has specified this option
       sys.stderr.write("--extra must be specified if --model=semisuper\n")
       sys.exit(1)

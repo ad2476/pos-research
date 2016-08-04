@@ -21,7 +21,6 @@ class VisibleDataHMM:
 
     self._sigma = None # not yet defined - don't know how many states there are
     self._tau = defaultdict(float)
-    self.xSet = set() # set of unique outputs
     self.n_sentences = len(labels)
     if self.n_sentences != len(outputs): # problem
       raise ValueError("Outputs and labels should be the same size")
@@ -36,7 +35,7 @@ class VisibleDataHMM:
   def train(self, params=None):
     n_yy_ = defaultdict(int) # n_y,y' (number of times y' follows y)
     n_ycirc = defaultdict(int) # n_y,o (number of times any label follows y)
-    self.n_yx = defaultdict(int) # n_y,x (number of times label y labels output x)
+    n_yx = defaultdict(int) # n_y,x (number of times label y labels output x)
 
     # build counts
     unkHash = hash("*UNK*")
@@ -50,17 +49,14 @@ class VisibleDataHMM:
         x = words[i] # corresponding output
         if self._counts[x] == 1:
           yunk = (y,unkHash)
-          self.n_yx[yunk] += 1
-          self.xSet.add(unkHash)
+          n_yx[yunk] += 1
           
         yxtuple = (y,x)
 
         n_yy_[ytuple] += 1
         n_ycirc[y] += 1
 
-        self.n_yx[yxtuple] += 1
-
-        self.xSet.add(x)
+        n_yx[yxtuple] += 1
 
     self.tagset = n_ycirc.keys()
     self._labelHash = common.makeLabelHash(self.tagset)
@@ -78,10 +74,15 @@ class VisibleDataHMM:
       self._sigma[yhash,yprimehash] = (count+self._alpha)/(n_ycirc[y]+self._alpha*self.tagsetSize)
     
     # compute tau dict:
-    for pair,count in self.n_yx.iteritems():
+    self._n_yx = defaultdict(float)
+    for pair,count in n_yx.iteritems():
       y,x = pair
       yhash = self._labelHash[y]
       self._tau[(yhash,x)] = count/float(n_ycirc[y])
+      self._n_yx[(yhash,x)] = count # class-wide dict should use hashed labels
+
+    self._n_yy_ = n_yy_
+    self._n_ycirc = n_ycirc
 
   """ Return the sigma_{y,y'} for given y and y' - or 0 if dne """
   def getSigma(self, y, yprime):
@@ -93,8 +94,6 @@ class VisibleDataHMM:
   def getTau(self, y, x):
     y = self._labelHash[y]
     x = hash(x)
-    if x not in self.xSet:
-      x = hash("*UNK*") # treat unknowns as "*UNK*" when decoding
 
     return self._tau[(y,x)]
 
@@ -110,3 +109,18 @@ class VisibleDataHMM:
   def getDistribution(self):
     return (self._sigma, self._tau)
 
+  """ Return the transition/emission counts from the visible data.
+      Converts n_y,y' and n_y,o to numpy arrays (nxn and 1xn resp.)
+  """
+  def getVisibleCounts(self):
+    n_yy_mat = np.zeros([self.tagsetSize]*2)
+    n_ycircmat = np.zeros(self.tagsetSize)
+
+    """ Iterate through n_yy and copy into array matrix """
+    for pair,count in self._n_yy_.iteritems():
+        y,yprime = pair
+        yhash, yprimehash = self._labelHash[y], self._labelHash[yprime]
+        n_yy_mat[yhash,yprimehash] = count
+        n_ycircmat[yhash] += count
+
+    return (self._n_yx, n_yy_mat, n_ycircmat)

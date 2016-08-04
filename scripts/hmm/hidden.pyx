@@ -101,19 +101,18 @@ cdef class HiddenDataHMM:
     return 1
 
   """ Perform the E-Step of EM. Return the expectations. """
-  cdef tuple _do_EStep(self, int iteration, int iter_cap):
+  cdef void _do_EStep(self, object expected_yx, double[:,:] expected_yy_, double[:] expected_ycirc,
+                       int iteration, int iter_cap):
     # s: sentence, n_sentence: # sentences, n: len(sentence), ALPHA=0, BETA=1, j:beta index
     cdef int s, n_sentence, n, ALPHA, BETA, i, j
-    cdef np.ndarray[double, ndim=2] alphas, betas
-    cdef np.ndarray[double, ndim=3] alphaBetaMat
     cdef long x_i, x_i1, x_j1
     cdef int STOPTAGIDX = self._STOPTAG
     cdef double alpha_y, beta_y, totalProb, sigma, tau, expOutputFreq
 
+    cdef np.ndarray[double, ndim=2] alphas, betas
+    cdef np.ndarray[double, ndim=3] alphaBetaMat
+
     cdef double[:,:] sigmaMat = self._sigma # memoryview on numpy array
-    cdef double[:,:] expected_yy_ = np.zeros([self._numStates]*2) # E[n_{y,y'}|x]: (y,y')->float
-    expected_yx = defaultdict(float) # E[n_{y,x}|x]: (y,x)->float
-    cdef double[:] expected_ycirc = np.zeros(self._numStates) # E[n_{y,\circ}|x]: y->float
     ALPHA, BETA = 0, 1 # indices
 
     s = 1
@@ -166,34 +165,38 @@ cdef class HiddenDataHMM:
             tau = self._tau[(y_,x_i1)]
             expected_yy_[y,y_] += self._expTransitionFreq(alpha_y,beta_y_,sigma,tau,totalProb)
 
-    return (expected_yx, expected_yy_, expected_ycirc) # return expectations
-
   """ Perform the M-Step of EM. Update sigma and tau mappings using expectations. """ 
   cdef void _do_MStep(self, expected_yx, double[:,:] expected_yy_, double[:] expected_ycirc):
     cdef double[:,:] sigmaMat = self._sigma # memoryview on numpy array
     cdef int y, yprime
     for y in range(0,self._numStates):
       for yprime in range(0,self._numStates):
-        sigmaMat[y,yprime] = expected_yy_[y,yprime]/expected_ycirc[y]
+        sigmaMat[y,yprime] = expected_yy_[y,yprime]/float(expected_ycirc[y])
 
     for emission,expectation in expected_yx.iteritems():
       y, _ = emission
-      self._tau[emission] = expectation/expected_ycirc[y]
+      self._tau[emission] = expectation/float(expected_ycirc[y])
 
-  cdef void _train(self, int ITER_CAP, tuple start_distribution):
-    print "Beginning train iterations (EM)..."
-    if start_distribution:
-      self._sigma, self._tau = start_distribution
-      self._tau.default_factory = self._smooth # use smoothing function for unknown emissions
-
+  cdef void _train(self, int ITER_CAP, tuple visible_params):
     cdef int i = 1
-    cdef double[:,:] e_yy_
-    cdef double[:] e_ycirc
+    cdef double[:,:] e_yy_ # E[n_{y,y'}|x]: (y,y')->float
+    cdef double[:] e_ycirc # E[n_{y,\circ}|x]: y->float
+
+    print "Beginning train iterations (EM)..."
+    start_expectations = defaultdict(float), np.zeros([self._numStates]*2), np.zeros(self._numStates)
+    if visible_params:
+      start_distribution, start_expectations = visible_params
+      self._sigma, self._tau = start_distribution
+      #self._tau.default_factory = self._smooth # use smoothing function for unknown emissions
+
+    print self._sigma
     while i <= ITER_CAP:
       print "iteration %i" % i
 
+      e_yx, e_yy_, e_ycirc = start_expectations
+
       # (E-step):
-      e_yx, e_yy_, e_ycirc = self._do_EStep(i, ITER_CAP)
+      #self._do_EStep(e_yx, e_yy_, e_ycirc, i, ITER_CAP)
 
       # (M-step): update sigma and tau
       self._do_MStep(e_yx, e_yy_, e_ycirc)
@@ -201,13 +204,15 @@ cdef class HiddenDataHMM:
       i += 1 # increment iterations count
 
   """ Train the HMM using EM to estimate sigma and tau distributions.
-        start_distribution: tuple (sigma, tau) defaultdicts representing an
-                            initial distribution (or none to use random init)
+        params: (visible_distribution, visible_counts) where
+                visible_distribution=(sigma,tau) of the VisibleDataHMM
+                visible_counts=(n_yy_, n_ycirc) of the VisibleDataHMM
+
+                pass None if these are not available (for purely unsupervised)
   """
   def train(self, params):
-    iter_cap, start_distribution = params
-    print self._sigma
-    self._train(iter_cap, start_distribution)
+    iter_cap, visible_params = params
+    self._train(iter_cap, visible_params)
     print self._sigma
 
   """ Return sigma_{y,yprime} - transition prob. from state y->yprime """

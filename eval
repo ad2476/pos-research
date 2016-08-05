@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Usage: ./eval STEP_SIZE EM_ITER OUTPUT
+#  where OUTPUT is the destination file of the scores
+#  STEP_SIZE is the increments of lines of extra data to go by e.g. STEP_SIZE=100
+#  EM_ITER is the number of iterations of EM to perform
+#  will run on 0,100,200,300,...,39672
+#
+#  Set by definition to run on English, for 1 iteration of EM
+
+if [ $# -ne "3" ]; then
+  echo "./eval STEP_SIZE EM_ITER OUTPUT"
+  exit 1
+fi
+
+# parameters to this script:
+STEP_SIZE=$1
+EM_ITER=$2
+OUTPUT=$3
+
+# parameters to the tagger:
+TRAIN="data/wsj2-21-trunc.txt"
+TEST="data/wsj22-trunc.txt"
+NOTAGS="data/wsj2-21-notags.txt"
+OUT="data/output.txt"
+EXTRA="data/tmp.txt"
+ITER=$EM_ITER
+
+TSIZE=( $( wc -l ${TRAIN}) ) # get size of training data
+
+#LEN=( $( wc -l ${NOTAGS}) ) # make into array, use only first word (the length)
+LEN=1000
+
+# remove old output file (check for confirm):
+if [ -e ${OUTPUT} ]; then
+  rm -i ${OUTPUT}
+  if [ $? -ne "0" ]; then
+    exit 1 # exit on error
+  fi
+fi
+
+# i is the size of the data/tmp.txt file (in no. lines)
+echo "Running tagger based on:"
+printf "\t${TSIZE} lines of labeled data, ${ITER} iterations of EM, WSJ corpus\n"
+printf "\nSemi-supervised accuracy:\n"
+for i in $( seq 0 ${STEP_SIZE} ${LEN[0]} ); do
+  printf " ${i} unlabeled lines: "
+  head -n $i ${NOTAGS} > ${EXTRA}
+  ./tag --lang EN --model semisuper --iter $ITER --train ${TRAIN} --test ${TEST} --output ${OUT} --extra ${EXTRA} &> /dev/null
+  score=$( ./score --lang EN ${TEST} ${OUT} )
+  printf "${score}\n"
+
+  # log to file:
+  echo "${i} ${score}" >> ${OUTPUT}
+done
+

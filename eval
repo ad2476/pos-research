@@ -43,6 +43,8 @@ fi
 echo "Running tagger based on:"
 printf "\t${TSIZE} lines of labeled data, ${ITER} iterations of EM, WSJ corpus\n"
 printf "\nSemi-supervised accuracy:\n"
+
+trap "kill -9 $$" SIGINT SIGTERM # catch these signals to kill tagger and this script
 for i in $( seq 0 ${STEP_SIZE} ${LEN[0]} ); do
   printf " ${i} unlabeled lines: "
   head -n $i ${NOTAGS} > ${EXTRA}
@@ -53,4 +55,7 @@ for i in $( seq 0 ${STEP_SIZE} ${LEN[0]} ); do
   # log to file:
   echo "${i} ${score}" >> ${OUTPUT}
 done
+
+# cleanup:
+rm -f ${OUT} ${EXTRA}
 

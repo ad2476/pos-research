@@ -198,6 +198,13 @@ cdef class HiddenDataHMM:
     if visible_params:
       start_distribution, start_expectations = visible_params
       self._sigma, self._tau = start_distribution
+      exp_yx, exp_yy_, exp_ycirc = start_expectations # temporarily unpack these to weight them
+      # weight these expectation counts because they are more correct:
+      exp_yy_ = exp_yy_*100.0
+      exp_ycirc = exp_ycirc*100.0
+      for key,val in exp_yx.iteritems():
+        exp_yx[key] = val*100.0
+
       self._tau.default_factory = self._smooth # use smoothing function for unknown emissions
 
     print self._sigma

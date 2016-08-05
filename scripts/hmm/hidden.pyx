@@ -2,11 +2,15 @@
 
 from collections import defaultdict
 import numpy as np
-cimport numpy as np
 import sys
 
 from . import _common as common
 from . import STOP
+
+cimport cython
+cimport numpy as np
+
+#np.set_printoptions(threshold=np.inf)
 
 """ A Hidden Markov Model constructed from hidden (unlabeled) data """
 cdef class HiddenDataHMM:
@@ -64,6 +68,7 @@ cdef class HiddenDataHMM:
       beta[i,y] = val
 
   """ Normalise alpha_i and beta_i (both row vectors) """
+  @cython.cdivision(True)
   cdef void _normaliseAlphaBeta(self, np.ndarray[double] alpha_i, np.ndarray[double] beta_i):
     normFactor = np.sum(alpha_i)
     alpha_i = alpha_i/normFactor
@@ -74,6 +79,7 @@ cdef class HiddenDataHMM:
         beta_y: beta_y(i)
         totalProb: alpha_STOP(n)
   """
+  @cython.cdivision(True)
   cdef double _expEmissionFreq(self, double alpha_y, double beta_y, double totalProb):
     return alpha_y*beta_y/totalProb
 
@@ -84,6 +90,7 @@ cdef class HiddenDataHMM:
         tau: tau_{y',x_{i+1}}
         totalProb: alpha_STOP(n)
   """
+  @cython.cdivision(True)
   cdef double _expTransitionFreq(self, double alpha_y, double beta_yprime,
                                  double sigma, double tau, double totalProb):
     return alpha_y*sigma*tau*beta_yprime/totalProb
@@ -144,7 +151,10 @@ cdef class HiddenDataHMM:
         self._normaliseAlphaBeta(alphas[i], betas[i])
         #if self._verifyProbs(alphas[i], betas[i], betas[0][STOPTAGIDX]) == 0:
         #  sys.stderr.write("Probabilities not valid!\n")
-        #  return (None,None,None)
+
+      if alphas[(n-1),STOPTAGIDX] == 0.0: # problem
+        print alphas
+        sys.exit(1)
 
       # Here we go again, now to calculate expectations
       for i in xrange(n-1):
@@ -169,9 +179,10 @@ cdef class HiddenDataHMM:
   cdef void _do_MStep(self, expected_yx, double[:,:] expected_yy_, double[:] expected_ycirc):
     cdef double[:,:] sigmaMat = self._sigma # memoryview on numpy array
     cdef int y, yprime
+    cdef float alpha = 1.0
     for y in range(0,self._numStates):
       for yprime in range(0,self._numStates):
-        sigmaMat[y,yprime] = expected_yy_[y,yprime]/float(expected_ycirc[y])
+        sigmaMat[y,yprime] = (expected_yy_[y,yprime]+alpha)/(expected_ycirc[y]+alpha*self._numStates)
 
     for emission,expectation in expected_yx.iteritems():
       y, _ = emission
@@ -187,7 +198,7 @@ cdef class HiddenDataHMM:
     if visible_params:
       start_distribution, start_expectations = visible_params
       self._sigma, self._tau = start_distribution
-      #self._tau.default_factory = self._smooth # use smoothing function for unknown emissions
+      self._tau.default_factory = self._smooth # use smoothing function for unknown emissions
 
     print self._sigma
     while i <= ITER_CAP:
@@ -196,12 +207,14 @@ cdef class HiddenDataHMM:
       e_yx, e_yy_, e_ycirc = start_expectations
 
       # (E-step):
-      #self._do_EStep(e_yx, e_yy_, e_ycirc, i, ITER_CAP)
+      self._do_EStep(e_yx, e_yy_, e_ycirc, i, ITER_CAP)
 
       # (M-step): update sigma and tau
       self._do_MStep(e_yx, e_yy_, e_ycirc)
 
       i += 1 # increment iterations count
+
+    self._tau.default_factory = lambda: 0.0
 
   """ Train the HMM using EM to estimate sigma and tau distributions.
         params: (visible_distribution, visible_counts) where

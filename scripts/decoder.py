@@ -1,6 +1,6 @@
 # Hidden Markov Model decoders
 import sys
-from hmm import STOP
+from hmm import STOP, UNK
 
 class ViterbiDecoder:
 
@@ -24,8 +24,7 @@ class ViterbiDecoder:
     for i in xrange(0,n): # iterate over the sentence
       word = sentence[i]
       if hash(word) not in self.wordCounts:
-        self.hmm.unkCount += 1
-        word = "*UNK*"
+        word = UNK
 
       argmax = (None, 0.0)
       for y in states: # argmax over every possible state y

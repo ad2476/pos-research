@@ -135,10 +135,9 @@ if __name__ == '__main__':
       sys.stderr.write("Error parsing extra input: Bad format.\n")
       sys.exit(1)
     _,ewc = buildCounts(extraWords) # build counts from the extra data
-    wc += ewc # add on total word count from extraWords to first wc
     tagset = visibleModel.getLabels() # get the tags from visible data
     # pass along the label hash from the visible model to our hidden model:
-    model = hmm.HiddenDataHMM(extraWords, tagset, wc, visibleModel.getLabelHash())
+    model = hmm.HiddenDataHMM(extraWords, tagset, ewc, visibleModel.getLabelHash())
 
   model.train(params) # train our model with the given training parameters
 

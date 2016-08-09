@@ -30,7 +30,7 @@ class ViterbiDecoder:
       for y in states: # argmax over every possible state y
         _, maxmu = argmax
         mu = prev_mu*self.hmm.getSigma(yprime,y)*self.hmm.getTau(y,word)
-        #mu = self.hmm.n_yx[(y,hash(word))] # "stupid" decoder - most freq.
+        #mu = self.hmm._n_yx[(self.hmm._labelHash[y],hash(word))] # "stupid" decoder - most freq.
 
         if mu >= maxmu:
           argmax = (y,mu)

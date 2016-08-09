@@ -8,8 +8,15 @@
 #
 #  Set by definition to run on English, for 1 iteration of EM
 
-if [ $# -ne "3" ]; then
-  echo "./eval STEP_SIZE EM_ITER OUTPUT"
+if [ $# -ne "3" ] && [ $# -ne "4" ]; then
+  echo "usage: eval STEP_SIZE EM_ITER OUTPUT [LANG (EN|SANS)]"
+  echo "Evaluate accuracy of semi-supervised HMM as a function of unlabeled corpus size."
+  echo ""
+  echo "Arguments:"
+  echo "  STEP_SIZE: Num. of lines data is increased by on each iteration."
+  echo "  EM_ITER: Num. of iterations of EM"
+  echo "  OUTPUT: Path to output table of corpus size vs. accuracy"
+  echo "  LANG: Either EN (english) or SANS (sanskrit). Defaults to English."
   exit 1
 fi
 
@@ -19,17 +26,30 @@ EM_ITER=$2
 OUTPUT=$3
 
 # parameters to the tagger:
-TRAIN="data/wsj2-21-trunc.txt"
-TEST="data/wsj22-trunc.txt"
-NOTAGS="data/wsj2-21-notags.txt"
+TRAIN="data/en/wsj2-21-trunc.txt"
+TEST="data/en/wsj22-trunc.txt"
+NOTAGS="data/en/wsj2-21-notags.txt"
 OUT="data/output.txt"
 EXTRA="data/tmp.txt"
 ITER=$EM_ITER
+LANG="EN"
+
+if [ $# -eq "4" ]; then
+  if [[ "${4}" -eq "SANS" ]]; then
+    TRAIN="data/sans/JNUTaggedTrainIAST.txt"
+    TEST="data/sans/JNUTagsetTestIAST.txt"
+    NOTAGS="data/sans/sivamahimnastava.txt"
+    LANG="SANS"
+  elif [[ "${4}" -ne "EN" ]]; then
+    echo "$4 is not a valid language option."
+    exit 1
+  fi
+fi
 
 TSIZE=( $( wc -l ${TRAIN}) ) # get size of training data
 
 #LEN=( $( wc -l ${NOTAGS}) ) # make into array, use only first word (the length)
-LEN=1000
+LEN=0
 
 # remove old output file (check for confirm):
 if [ -e ${OUTPUT} ]; then
@@ -41,14 +61,14 @@ fi
 
 # i is the size of the data/tmp.txt file (in no. lines)
 echo "Running tagger based on:"
-printf "\t${TSIZE} lines of labeled data, ${ITER} iterations of EM, WSJ corpus\n"
+printf "\t${TSIZE} lines of labeled data, ${ITER} iterations of EM, lang=${LANG}\n"
 printf "\nSemi-supervised accuracy:\n"
 
 trap "kill -9 $$" SIGINT SIGTERM # catch these signals to kill tagger and this script
 for i in $( seq 0 ${STEP_SIZE} ${LEN[0]} ); do
   printf " ${i} unlabeled lines: "
   head -n $i ${NOTAGS} > ${EXTRA}
-  ./tag --lang EN --model semisuper --iter $ITER --train ${TRAIN} --test ${TEST} --output ${OUT} --extra ${EXTRA} &> /dev/null
+  ./tag --lang ${LANG} --model semisuper --iter $ITER --train ${TRAIN} --test ${TEST} --output ${OUT} --extra ${EXTRA}
   score=$( ./score --lang EN ${TEST} ${OUT} )
   printf "${score}\n"
 

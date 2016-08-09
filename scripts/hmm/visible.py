@@ -21,7 +21,7 @@ class VisibleDataHMM:
     self._counts = counts
     self._wc = wordCount
 
-    self._alpha = 1.0 # add-alpha
+    self._alpha = 2.0 # add-alpha
 
     self._sigma = None # not yet defined - don't know how many states there are
     self._tau = None # also not yet defined, need n_ycirc

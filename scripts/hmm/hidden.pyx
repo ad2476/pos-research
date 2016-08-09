@@ -210,7 +210,7 @@ cdef class HiddenDataHMM:
       for key,val in exp_yx.iteritems():
         exp_yx[key] = val*100.0
 
-      self._tau._wc = self._wc # update taudict's internal wordcount
+      self._tau._wc += self._wc # update taudict's internal wordcount
 
     print self._sigma
     while i <= ITER_CAP:

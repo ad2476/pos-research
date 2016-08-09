@@ -2,24 +2,29 @@
 
 from collections import defaultdict
 import numpy as np
-cimport numpy as np
 import sys
 
 from . import _common as common
 from . import STOP
 
+cimport cython
+cimport numpy as np
+
+#np.set_printoptions(threshold=np.inf)
+
 """ A Hidden Markov Model constructed from hidden (unlabeled) data """
 cdef class HiddenDataHMM:
   cdef public _sentences, _states, _labelHash, _sigma, _tau, _smooth
-  cdef int _ITER_CAP, _numStates
+  cdef int _ITER_CAP, _numStates, _wc
   cdef public int unkCount, _STOPTAG
 
   """ Construct the HMM object using a list of outputs and a set of posLabels. """
-  def __init__(self, outputs, posLabels, labelHash=None):
+  def __init__(self, outputs, posLabels, wordCount, labelHash=None):
     # hash to create an array of ints
     self._sentences = [[hash(x) for x in sentence] for sentence in outputs]
     self._numStates = len(posLabels)
     self._states = range(0, self._numStates) # faster np.array indexing
+    self._wc = wordCount
 
     # labelHash maps the string label name to an internal int index
     self._labelHash = labelHash or common.makeLabelHash(posLabels)
@@ -31,7 +36,7 @@ cdef class HiddenDataHMM:
     self._sigma = np.full([self._numStates]*2, 0.1)*randMat # [y,y']->proba
 
     # initialise tau as defaultdict with random initialisation (default)
-    self._smooth = lambda: 0.01*np.random.uniform(0.95,1.05)
+    self._smooth = lambda: 1.0/self._wc
     self._tau = defaultdict(self._smooth)
 
     self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)
@@ -41,6 +46,7 @@ cdef class HiddenDataHMM:
         x: the output at this timestep
       Return: Nothing, calculated in place
   """
+  @cython.boundscheck(False)
   cdef void _computeAlphasTimestep(self, double[:,:] sigma, double[:,:] alpha, int i, long x):
     cdef double val
     for y in range(0, self._numStates):
@@ -54,6 +60,7 @@ cdef class HiddenDataHMM:
         xNext: the output at next timestep
       Return: Nothing, calculated in place
   """
+  @cython.boundscheck(False)
   cdef void _computeBetasTimestep(self, double[:,:] sigma, double[:,:] beta, int i, long xNext):
     cdef double val
     cdef int y, yprime
@@ -64,6 +71,7 @@ cdef class HiddenDataHMM:
       beta[i,y] = val
 
   """ Normalise alpha_i and beta_i (both row vectors) """
+  @cython.cdivision(True)
   cdef void _normaliseAlphaBeta(self, np.ndarray[double] alpha_i, np.ndarray[double] beta_i):
     normFactor = np.sum(alpha_i)
     alpha_i = alpha_i/normFactor
@@ -74,6 +82,7 @@ cdef class HiddenDataHMM:
         beta_y: beta_y(i)
         totalProb: alpha_STOP(n)
   """
+  @cython.cdivision(True)
   cdef double _expEmissionFreq(self, double alpha_y, double beta_y, double totalProb):
     return alpha_y*beta_y/totalProb
 
@@ -84,6 +93,7 @@ cdef class HiddenDataHMM:
         tau: tau_{y',x_{i+1}}
         totalProb: alpha_STOP(n)
   """
+  @cython.cdivision(True)
   cdef double _expTransitionFreq(self, double alpha_y, double beta_yprime,
                                  double sigma, double tau, double totalProb):
     return alpha_y*sigma*tau*beta_yprime/totalProb
@@ -144,7 +154,10 @@ cdef class HiddenDataHMM:
         self._normaliseAlphaBeta(alphas[i], betas[i])
         #if self._verifyProbs(alphas[i], betas[i], betas[0][STOPTAGIDX]) == 0:
         #  sys.stderr.write("Probabilities not valid!\n")
-        #  return (None,None,None)
+
+      if alphas[(n-1),STOPTAGIDX] == 0.0: # problem
+        print alphas
+        sys.exit(1)
 
       # Here we go again, now to calculate expectations
       for i in xrange(n-1): # for each word in the sentence
@@ -169,13 +182,16 @@ cdef class HiddenDataHMM:
   cdef void _do_MStep(self, expected_yx, double[:,:] expected_yy_, double[:] expected_ycirc):
     cdef double[:,:] sigmaMat = self._sigma # memoryview on numpy array
     cdef int y, yprime
+    cdef float alpha = 1.0
     for y in range(0,self._numStates):
       for yprime in range(0,self._numStates):
-        sigmaMat[y,yprime] = expected_yy_[y,yprime]/float(expected_ycirc[y])
+        # smooth sigma:
+        sigmaMat[y,yprime] = (expected_yy_[y,yprime]+alpha)/(expected_ycirc[y]+alpha*self._numStates)
 
     for emission,expectation in expected_yx.iteritems():
       y, _ = emission
-      self._tau[emission] = expectation/float(expected_ycirc[y])
+      # smooth tau:
+      self._tau[emission] = (expectation+alpha)/(expected_ycirc[y] + alpha*self._wc)
 
   cdef void _train(self, int ITER_CAP, tuple visible_params):
     cdef int i = 1
@@ -187,7 +203,14 @@ cdef class HiddenDataHMM:
     if visible_params:
       start_distribution, start_expectations = visible_params
       self._sigma, self._tau = start_distribution
-      #self._tau.default_factory = self._smooth # use smoothing function for unknown emissions
+      exp_yx, exp_yy_, exp_ycirc = start_expectations # temporarily unpack these to weight them
+      # weight these expectation counts because they are more correct:
+      exp_yy_ = exp_yy_*100.0
+      exp_ycirc = exp_ycirc*100.0
+      for key,val in exp_yx.iteritems():
+        exp_yx[key] = val*100.0
+
+      self._tau._wc += self._wc # update taudict's internal wordcount
 
     print self._sigma
     while i <= ITER_CAP:
@@ -196,7 +219,7 @@ cdef class HiddenDataHMM:
       e_yx, e_yy_, e_ycirc = start_expectations
 
       # (E-step):
-      #self._do_EStep(e_yx, e_yy_, e_ycirc, i, ITER_CAP)
+      self._do_EStep(e_yx, e_yy_, e_ycirc, i, ITER_CAP)
 
       # (M-step): update sigma and tau
       self._do_MStep(e_yx, e_yy_, e_ycirc)

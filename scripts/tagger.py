@@ -103,15 +103,15 @@ if __name__ == '__main__':
       sys.exit(1)
 
     words, tags = data
-    counts,_ = buildCounts(words) # Build word counts from the input
-    model = hmm.VisibleDataHMM(words, tags, counts)
+    counts,wc = buildCounts(words) # Build word counts from the input
+    model = hmm.VisibleDataHMM(words, tags, counts, wc)
     params = None
   elif args.model == "unsuper":
     words = FilePreparser(trainData).parseWords()
 
-    counts,_ = buildCounts(words)
+    counts,wc = buildCounts(words)
     tagset = buildTags(args)
-    model = hmm.HiddenDataHMM(words, tagset)
+    model = hmm.HiddenDataHMM(words, tagset, wc)
     params = (iter_cap, None)
   else: # model is semi-supervised
     data = FilePreparser(trainData).parseWordsTags()
@@ -120,8 +120,8 @@ if __name__ == '__main__':
       sys.exit(1)
 
     words, tags = data
-    counts,_ = buildCounts(words)
-    visibleModel = hmm.VisibleDataHMM(words, tags, counts) # now we have a visible model
+    counts,wc = buildCounts(words)
+    visibleModel = hmm.VisibleDataHMM(words, tags, counts, wc) # now we have a visible model
     visibleModel.train() # build the counts from the visible model
 
     params = (iter_cap, (visibleModel.getDistribution(), visibleModel.getVisibleCounts()))
@@ -131,14 +131,15 @@ if __name__ == '__main__':
 
     unlabeledData = buildCorpus(args.extra)
     extraWords = FilePreparser(unlabeledData).parseWords() # preparse unlabeled data
+    if extraWords is None:
+      sys.stderr.write("Error parsing extra input: Bad format.\n")
+      sys.exit(1)
+    _,ewc = buildCounts(extraWords) # build counts from the extra data
     tagset = visibleModel.getLabels() # get the tags from visible data
     # pass along the label hash from the visible model to our hidden model:
-    model = hmm.HiddenDataHMM(extraWords, tagset, visibleModel.getLabelHash())
+    model = hmm.HiddenDataHMM(extraWords, tagset, ewc, visibleModel.getLabelHash())
 
   model.train(params) # train our model with the given training parameters
-
-  #W_size = len(counts) # unique word types
-  #print str(W_size) + " unique words, " + str(len(model.getLabels())) + " labels"
 
   viterbi = decoder.ViterbiDecoder(model, counts)
 
@@ -149,9 +150,6 @@ if __name__ == '__main__':
     yhat = viterbi.decode(sentence)
     tagged = prep.formatOutput(sentence, yhat)
     outFile.write(tagged+"\n")
-
-  #_, testWordCount = buildCounts(testData)
-  #print float(model.unkCount)/testWordCount
 
   outFile.close()
 

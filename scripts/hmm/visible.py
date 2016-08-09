@@ -6,6 +6,7 @@ import numpy as np
 import sys
 
 from . import _common as common
+from . import UNK
 
 """ A Hidden Markov Model constructed from visible data """
 class VisibleDataHMM:
@@ -13,21 +14,20 @@ class VisibleDataHMM:
   """ Construct the HMM object using the outputs and labels (and wordcounts)
       Pass a dict of word->count for *UNK* substitution in train()
   """
-  def __init__(self, outputs, labels, counts):
+  def __init__(self, outputs, labels, counts, wordCount):
     # hash x for compatibility with HiddenDataHMM:
     self._outputs = [[hash(x) for x in sentence] for sentence in outputs]
     self._labels = labels # list of list of states
     self._counts = counts
+    self._wc = wordCount
+
+    self._alpha = 2.0 # add-alpha
 
     self._sigma = None # not yet defined - don't know how many states there are
-    self._tau = defaultdict(float)
+    self._tau = None # also not yet defined, need n_ycirc
     self.n_sentences = len(labels)
     if self.n_sentences != len(outputs): # problem
       raise ValueError("Outputs and labels should be the same size")
-
-    self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)
-
-    self._alpha = 1.0 # add-alpha
 
   """ Train the HMM by building the sigma and tau mappings.
         - params is a useless parameter, for conforming to the interface for HMMs
@@ -38,7 +38,7 @@ class VisibleDataHMM:
     n_yx = defaultdict(int) # n_y,x (number of times label y labels output x)
 
     # build counts
-    unkHash = hash("*UNK*")
+    unkHash = hash(UNK)
     for words,tags in itertools.izip(self._outputs,self._labels):
       n = len(words)
       for i in xrange(0, n - 1):
@@ -75,10 +75,11 @@ class VisibleDataHMM:
     
     # compute tau dict:
     self._n_yx = defaultdict(float)
+    self._tau = common.TauDict(self._alpha, n_ycirc, self._wc)
     for pair,count in n_yx.iteritems():
       y,x = pair
       yhash = self._labelHash[y]
-      self._tau[(yhash,x)] = count/float(n_ycirc[y])
+      self._tau[(yhash,x)] = (count+self._alpha)/(n_ycirc[y]+self._alpha*self.tagsetSize)
       self._n_yx[(yhash,x)] = count # class-wide dict should use hashed labels
 
     self._n_yy_ = n_yy_

@@ -147,10 +147,10 @@ cdef class HiddenDataHMM:
         #  return (None,None,None)
 
       # Here we go again, now to calculate expectations
-      for i in xrange(n-1):
+      for i in xrange(n-1): # for each word in the sentence
         x_i = sentence[i]
         x_i1 = sentence[i+1]
-        for y in range(0,self._numStates):
+        for y in range(0,self._numStates): # iterate over each label y
           alpha_y = alphas[i,y]
           beta_y = betas[i,y]
           totalProb = alphas[(n-1),STOPTAGIDX]

@@ -64,7 +64,7 @@ class VisibleDataHMM:
 
     # compute sigma matrix:
     self._sigma = np.zeros([self.tagsetSize]*2)
-    for y,_ in n_ycirc.iteritems(): # first, set up smoothing:
+    for y in self.tagset: # first, set up smoothing:
       yhash = self._labelHash[y]
       sigmaSmoothUnk = self._alpha/(n_ycirc[y]+self._alpha*self.tagsetSize)
       self._sigma[yhash,:] = sigmaSmoothUnk # smooth sigma if the pair (y,y') dne

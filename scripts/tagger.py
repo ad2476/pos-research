@@ -137,7 +137,7 @@ if __name__ == '__main__':
     _,ewc = buildCounts(extraWords) # build counts from the extra data
     tagset = visibleModel.getLabels() # get the tags from visible data
     # pass along the label hash from the visible model to our hidden model:
-    model = hmm.HiddenDataHMM(extraWords, tagset, ewc, visibleModel.getLabelHash())
+    model = hmm.HiddenDataHMM(extraWords, tagset, (wc+ewc), visibleModel.getLabelHash())
 
   model.train(params) # train our model with the given training parameters
 

@@ -7,7 +7,7 @@ class ViterbiDecoder:
   """ Construct the decoder by passing a hidden markov model. """
   def __init__(self, hmm, wordCounts):
     self.hmm = hmm
-    self.wordCounts = wordCounts
+    self.words = wordCounts
 
   """ Decode a given sentence (as a list)
       
@@ -23,7 +23,7 @@ class ViterbiDecoder:
     states = self.hmm.getLabels()
     for i in xrange(0,n): # iterate over the sentence
       word = sentence[i]
-      if hash(word) not in self.wordCounts:
+      if hash(word) not in self.words:
         word = UNK
 
       argmax = (None, 0.0)

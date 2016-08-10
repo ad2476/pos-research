@@ -21,7 +21,7 @@ class VisibleDataHMM:
     self._counts = counts
     self._wc = wordCount
 
-    self._alpha = 2.0 # add-alpha
+    self._alpha = 1.0 # add-alpha
 
     self._sigma = None # not yet defined - don't know how many states there are
     self._tau = None # also not yet defined, need n_ycirc
@@ -39,25 +39,27 @@ class VisibleDataHMM:
 
     # build counts
     unkHash = hash(UNK)
-    for words,tags in itertools.izip(self._outputs,self._labels):
+    for words,tags in itertools.izip(self._outputs,self._labels): # iterate over each sentence
       n = len(words)
-      for i in xrange(0, n - 1):
+      for i in xrange(0, n - 1): # iterate over each word/tag in the sequence
         y = tags[i]
         y_ = tags[i+1] # y_ = y'
-        ytuple = (y,y_)
+        ytuple = (y,y_) # label transition
 
         x = words[i] # corresponding output
         if self._counts[x] == 1:
           yunk = (y,unkHash)
           n_yx[yunk] += 1
           
-        yxtuple = (y,x)
+        yxtuple = (y,x) # emission
 
+        # increment the number of times we've seen these:
         n_yy_[ytuple] += 1
         n_ycirc[y] += 1
 
         n_yx[yxtuple] += 1
 
+    # properties of this HMM:
     self.tagset = n_ycirc.keys()
     self._labelHash = common.makeLabelHash(self.tagset)
     self.tagsetSize = len(self.tagset)
@@ -79,7 +81,7 @@ class VisibleDataHMM:
     for pair,count in n_yx.iteritems():
       y,x = pair
       yhash = self._labelHash[y]
-      self._tau[(yhash,x)] = (count+self._alpha)/(n_ycirc[y]+self._alpha*self.tagsetSize)
+      self._tau[(yhash,x)] = (count+self._alpha)/(n_ycirc[y]+self._alpha*self.tagsetSize) # smooth
       self._n_yx[(yhash,x)] = count # class-wide dict should use hashed labels
 
     self._n_yy_ = n_yy_
@@ -95,7 +97,6 @@ class VisibleDataHMM:
   def getTau(self, y, x):
     y = self._labelHash[y]
     x = hash(x)
-
     return self._tau[(y,x)]
 
   """ Return a copy of the labels of this HMM """

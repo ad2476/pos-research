@@ -16,7 +16,8 @@ cimport numpy as np
 cdef class HiddenDataHMM:
   cdef public _sentences, _states, _labelHash, _sigma, _tau, _smooth
   cdef int _ITER_CAP, _numStates, _wc
-  cdef public int unkCount, _STOPTAG
+  cdef public int _STOPTAG
+  cdef float _alpha
 
   """ Construct the HMM object using a list of outputs and a set of posLabels. """
   def __init__(self, outputs, posLabels, wordCount, labelHash=None):
@@ -36,10 +37,9 @@ cdef class HiddenDataHMM:
     self._sigma = np.full([self._numStates]*2, 0.1)*randMat # [y,y']->proba
 
     # initialise tau as defaultdict with random initialisation (default)
-    self._smooth = lambda: 1.0/self._wc
+    self._alpha = 1.0
+    self._smooth = lambda: self._alpha/self._wc
     self._tau = defaultdict(self._smooth)
-
-    self.unkCount = 0 # used for metrics calculation (e.g. % UNK in doc)
 
   """ Compute alphas for this timestep.
         alpha: n x m slice of the alphaBetaMat (n words by m states)
@@ -129,6 +129,7 @@ cdef class HiddenDataHMM:
     n_sentence = len(self._sentences) 
     for sentence in self._sentences:
       print "- sentence: %i of %i \t\t (iteration %i/%i)"%(s,n_sentence,iteration,iter_cap)
+      sys.stdout.flush()
       s+=1
 
       n = len(sentence)
@@ -182,7 +183,7 @@ cdef class HiddenDataHMM:
   cdef void _do_MStep(self, expected_yx, double[:,:] expected_yy_, double[:] expected_ycirc):
     cdef double[:,:] sigmaMat = self._sigma # memoryview on numpy array
     cdef int y, yprime
-    cdef float alpha = 1.0
+    cdef float alpha = self._alpha
     for y in range(0,self._numStates):
       for yprime in range(0,self._numStates):
         # smooth sigma:
@@ -191,7 +192,8 @@ cdef class HiddenDataHMM:
     for emission,expectation in expected_yx.iteritems():
       y, _ = emission
       # smooth tau:
-      self._tau[emission] = (expectation+alpha)/(expected_ycirc[y] + alpha*self._wc)
+      self._tau[emission] = (expectation+alpha)/(expected_ycirc[y] + alpha*self._numStates)
+      #self._tau[emission] = (expectation)/(expected_ycirc[y])
 
   cdef void _train(self, int ITER_CAP, tuple visible_params):
     cdef int i = 1
@@ -210,9 +212,9 @@ cdef class HiddenDataHMM:
       for key,val in exp_yx.iteritems():
         exp_yx[key] = val*100.0
 
-      self._tau._wc += self._wc # update taudict's internal wordcount
+      self._tau._wc = self._wc # update taudict's internal wordcount
+      self._alpha = self._tau._alpha
 
-    print self._sigma
     while i <= ITER_CAP:
       print "iteration %i" % i
 
@@ -236,7 +238,7 @@ cdef class HiddenDataHMM:
   def train(self, params):
     iter_cap, visible_params = params
     self._train(iter_cap, visible_params)
-    print self._sigma
+    print "Done."
 
   """ Return sigma_{y,yprime} - transition prob. from state y->yprime """
   def getSigma(self, y, yprime):

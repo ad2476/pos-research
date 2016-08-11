@@ -82,7 +82,12 @@ printf "\nSemi-supervised accuracy:\n"
 # i is the size of the data/tmp.txt file (in no. lines)
 for i in $( seq 0 ${step_size} ${len[0]} ); do
   printf " ${i} unlabeled lines: "
-  head -n $i ${NOTAGS} > ${EXTRA}
+  if [ $i -eq 0 ]; then
+    touch ${EXTRA}
+  else
+    head -n $i ${NOTAGS} > ${EXTRA}
+  fi
+
   ./tag --lang ${lang} --model semisuper --iter $iter --train ${TRAIN} --test ${TEST} --output ${OUT} --extra ${EXTRA} >"${OUTPUT_DIR}/semisupervised_stdout.txt" 2>&1
   score=$( ./score --lang ${lang} ${TEST} ${OUT} )
   printf "${score}\n"

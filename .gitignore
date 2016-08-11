@@ -9,3 +9,5 @@ debug.txt
 debug/*
 
 *.so
+
+scripts/hmm/hidden.c

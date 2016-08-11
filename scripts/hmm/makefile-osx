@@ -1,0 +1,26 @@
+CC = gcc
+PYCC = cython
+
+# for these paths, and for LDFLAGS run python-config --cflags --ldflags on your OS X system
+PYHEADERS = /usr/local/Cellar/python/2.7.11/Frameworks/Python.framework/Versions/2.7/include/python2.7
+NUMPYHEADERS = /usr/local/lib/python2.7/site-packages/numpy/core/include
+
+PYFLAGS = -v -2
+CFLAGS = -shared -pthread -fPIC -fwrapv -O2 -fno-strict-aliasing -I$(PYHEADERS) -I$(NUMPYHEADERS)
+LDFLAGS = -L/usr/local/Cellar/python/2.7.11/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config -lpython2.7 -ldl -framework CoreFoundation
+
+PYXSRC = hidden.pyx
+CSRC = hidden.c
+MODULE = hidden.so
+
+all: $(CSRC) $(MODULE)
+
+$(CSRC): $(PYXSRC)
+	$(PYCC) $(PYFLAGS) $^
+
+$(MODULE): $(CSRC)
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
+
+clean:
+	rm $(MODULE)
+

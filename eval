@@ -69,12 +69,17 @@ if [ -e ${output} ]; then
   fi
 fi
 
+# remove old tmp file
+if [ -e ${EXTRA} ]; then
+  rm -f ${EXTRA}
+fi
+
 trap "kill -9 $$" SIGINT SIGTERM # catch these signals to kill tagger and this script
 
 echo "Running tagger based on:"
 printf "\t${tsize} lines of labeled data, ${iter} iterations of EM, lang=${lang}\n"
 printf "\nSupervised baseline accuracy : "
-./tag --lang ${lang} --model super --train ${TRAIN} --test ${TEST} --output ${OUT} >"${OUTPUT_DIR}/supervised_stdout.txt" 2>&1
+./tag --lang ${lang} --model super --train ${TRAIN} --test ${TEST} --output ${OUT} >"${OUTPUT_DIR}/supervised_stdout.txt" 2>"${OUTPUT_DIR}/supervised_stderr.txt"
 printf "$( ./score --lang ${lang} ${TEST} ${OUT} )\n"
 
 printf "\nSemi-supervised accuracy:\n"
@@ -88,7 +93,7 @@ for i in $( seq 0 ${step_size} ${len[0]} ); do
     head -n $i ${NOTAGS} > ${EXTRA}
   fi
 
-  ./tag --lang ${lang} --model semisuper --iter $iter --train ${TRAIN} --test ${TEST} --output ${OUT} --extra ${EXTRA} >"${OUTPUT_DIR}/semisupervised_stdout.txt" 2>&1
+  ./tag --lang ${lang} --model semisuper --iter $iter --train ${TRAIN} --test ${TEST} --output ${OUT} --extra ${EXTRA} >"${OUTPUT_DIR}/semisupervised_stdout.txt" 2>"${OUTPUT_DIR}/semisupervised_stderr.txt"
   score=$( ./score --lang ${lang} ${TEST} ${OUT} )
   printf "${score}\n"
 

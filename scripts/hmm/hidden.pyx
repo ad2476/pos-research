@@ -193,7 +193,6 @@ cdef class HiddenDataHMM:
       y, _ = emission
       # smooth tau:
       self._tau[emission] = (expectation+alpha)/(expected_ycirc[y] + alpha*self._numStates)
-      #self._tau[emission] = (expectation)/(expected_ycirc[y])
 
   cdef void _train(self, int ITER_CAP, tuple visible_params):
     cdef int i = 1

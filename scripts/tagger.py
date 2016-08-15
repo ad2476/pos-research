@@ -7,6 +7,7 @@ import decoder
 import preparser
 
 DFLT_ITER_CAP = 1
+DFLT_ALPHA = 1.0 # for now, this is only hardcoded
 
 def parseProgramArgs():
   parser = argparse.ArgumentParser(description="HMM-based part-of-speech tagger. See README.md for detailed documentation")
@@ -47,7 +48,6 @@ def buildCounts(document):
   for line in document:
     words = line
     for word in words:
-      word = hash(word)
       counts[word] += 1
       n_o += 1
 
@@ -79,6 +79,19 @@ def buildTags(args):
 
   return tags
 
+def setupVisibleModel(PreparserClass, UnkerClass, corpus):
+  data = PreparserClass(corpus).parseWordsTags()
+  if data is None:
+    sys.stderr.write("Error parsing input: Bad format.\n")
+    sys.exit(1)
+
+  words,tags = data
+  counts,wc = buildCounts(words)
+  unker = UnkerClass(words,counts) # construct the unker (for unk substitution)
+
+  print counts
+  return hmm.VisibleDataHMM(unker, tags, wc)
+
 if __name__ == '__main__':
 
   args = parseProgramArgs()
@@ -92,37 +105,27 @@ if __name__ == '__main__':
   # Determine which preparser to use (this can be extensible)
   if args.lang == "EN":
     FilePreparser = preparser.EnglishWSJParser
+    UnkerClass = hmm.unk.BasicUnker
   elif args.lang == "SANS":
     FilePreparser = preparser.SanskritJNUParser
+    UnkerClass = hmm.unk.PratyayaUnker
 
   # Set up models depending on the type:
   if args.model == "super":
-    data = FilePreparser(trainData).parseWordsTags()
-    if data is None:
-      sys.stderr.write("Error parsing input: Bad format.\n")
-      sys.exit(1)
-
-    words, tags = data
-    counts,wc = buildCounts(words) # Build word counts from the input
-    model = hmm.VisibleDataHMM(words, tags, counts, wc)
-    params = None
+    model = setupVisibleModel(FilePreparser, UnkerClass, trainData)
+    params = DFLT_ALPHA # alpha smoothing
   elif args.model == "unsuper":
     words = FilePreparser(trainData).parseWords()
+    if words is None:
+      sys.stderr.write("Error parsing input: Bad format.\n")
 
     counts,wc = buildCounts(words)
     tagset = buildTags(args)
     model = hmm.HiddenDataHMM(words, tagset, wc)
     params = (iter_cap, None)
   else: # model is semi-supervised
-    data = FilePreparser(trainData).parseWordsTags()
-    if data is None:
-      sys.stderr.write("Error parsing input: Bad format.\n")
-      sys.exit(1)
-
-    words, tags = data
-    counts,wc = buildCounts(words)
-    visibleModel = hmm.VisibleDataHMM(words, tags, counts, wc) # now we have a visible model
-    visibleModel.train() # build the counts from the visible model
+    visibleModel = setupVisibleModel(FilePreparser, UnkerClass, trainData) # now we have a visible model
+    visibleModel.train(DFLT_ALPHA) # build the counts from the visible model
 
     params = (iter_cap, (visibleModel.getDistribution(), visibleModel.getVisibleCounts()))
     if not args.extra: # make sure the user has specified this option
@@ -130,18 +133,22 @@ if __name__ == '__main__':
       sys.exit(1)
 
     unlabeledData = buildCorpus(args.extra)
+
     extraWords = FilePreparser(unlabeledData).parseWords() # preparse unlabeled data
     if extraWords is None:
       sys.stderr.write("Error parsing extra input: Bad format.\n")
       sys.exit(1)
-    _,ewc = buildCounts(extraWords) # build counts from the extra data
+
+    _,wc = buildCounts(extraWords) # build counts from the extra data
+    wc += visibleModel.getWordCount() # add the word counts from the tagged corpus
     tagset = visibleModel.getLabels() # get the tags from visible data
-    # pass along the label hash from the visible model to our hidden model:
-    model = hmm.HiddenDataHMM(extraWords, tagset, (wc+ewc), visibleModel.getLabelHash())
+    labelMapper = visibleModel.getLabelHash() # get the mapping of label:str -> label:int
+
+    model = hmm.HiddenDataHMM(extraWords, tagset, wc, visibleModel.getLabelHash())
 
   model.train(params) # train our model with the given training parameters
 
-  viterbi = decoder.ViterbiDecoder(model, counts)
+  viterbi = decoder.ViterbiDecoder(model)
 
   # decode the test file:
   prep = FilePreparser(testData)

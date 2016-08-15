@@ -1,13 +1,12 @@
 # Hidden Markov Model decoders
 import sys
-from hmm import STOP, UNK
+from hmm import STOP
 
 class ViterbiDecoder:
 
   """ Construct the decoder by passing a hidden markov model. """
-  def __init__(self, hmm, wordCounts):
+  def __init__(self, hmm):
     self.hmm = hmm
-    self.words = wordCounts
 
   """ Decode a given sentence (as a list)
       
@@ -23,14 +22,11 @@ class ViterbiDecoder:
     states = self.hmm.getLabels()
     for i in xrange(0,n): # iterate over the sentence
       word = sentence[i]
-      if hash(word) not in self.words:
-        word = UNK
 
       argmax = (None, 0.0)
       for y in states: # argmax over every possible state y
         _, maxmu = argmax
         mu = prev_mu*self.hmm.getSigma(yprime,y)*self.hmm.getTau(y,word)
-        #mu = self.hmm._n_yx[(self.hmm._labelHash[y],hash(word))] # "stupid" decoder - most freq.
 
         if mu >= maxmu:
           argmax = (y,mu)

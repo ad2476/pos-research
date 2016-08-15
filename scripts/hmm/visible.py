@@ -6,50 +6,55 @@ import numpy as np
 import sys
 
 from . import _common as common
-from . import UNK
+from . import unk
 
 """ A Hidden Markov Model constructed from visible data """
 class VisibleDataHMM:
 
   """ Construct the HMM object using the outputs and labels (and wordcounts)
-      Pass a dict of word->count for *UNK* substitution in train()
+        unker: A subclass inheriting from AbstractUnker
+        tags: A list of tag sequences (should correspond to the structure of
+              the word corpus i.e. a list of sentences-as-lists)
+        wordCount: count of unique words in the corpus
   """
-  def __init__(self, outputs, labels, counts, wordCount):
+  def __init__(self, unker, tags, wordCount):
     # hash x for compatibility with HiddenDataHMM:
-    self._outputs = [[hash(x) for x in sentence] for sentence in outputs]
-    self._labels = labels # list of list of states
-    self._counts = counts
+    self._outputs = [[hash(x) for x in sentence] for sentence in unker.getUnkedCorpus()]
+    self._unker = unker # keep the unker so we can also count the original words
+    self._labels = tags # list of list of states
     self._wc = wordCount
-
-    self._alpha = 1.0 # add-alpha
 
     self._sigma = None # not yet defined - don't know how many states there are
     self._tau = None # also not yet defined, need n_ycirc
-    self.n_sentences = len(labels)
-    if self.n_sentences != len(outputs): # problem
+    self.n_sentences = len(tags)
+    if self.n_sentences != len(self._outputs): # problem
       raise ValueError("Outputs and labels should be the same size")
 
   """ Train the HMM by building the sigma and tau mappings.
-        - params is a useless parameter, for conforming to the interface for HMMs
+        - params is an alpha value to use (default is 1.0)
   """
-  def train(self, params=None):
+  def train(self, params=1.0):
+    self._alpha = params # add-alpha smoothing
+
     n_yy_ = defaultdict(int) # n_y,y' (number of times y' follows y)
     n_ycirc = defaultdict(int) # n_y,o (number of times any label follows y)
     n_yx = defaultdict(int) # n_y,x (number of times label y labels output x)
 
     # build counts
-    unkHash = hash(UNK)
-    for words,tags in itertools.izip(self._outputs,self._labels): # iterate over each sentence
+    for i in xrange(len(self._outputs)): # iterate over each sentence
+      words = self._outputs[i]
+      tags = self._labels[i]
       n = len(words)
-      for i in xrange(0, n - 1): # iterate over each word/tag in the sequence
-        y = tags[i]
-        y_ = tags[i+1] # y_ = y'
+      for j in xrange(0, n - 1): # iterate over each word/tag in the sequence
+        y = tags[j]
+        y_ = tags[j+1] # y_ = y'
         ytuple = (y,y_) # label transition
 
-        x = words[i] # corresponding output
-        if self._counts[x] == 1:
-          yunk = (y,unkHash)
-          n_yx[yunk] += 1
+        x = words[j] # corresponding output
+        orig = hash(self._unker.getOrigWord(i,j)) # hash this!
+        if x != orig: # this word was UNKed
+          yorig = (y,orig)
+          n_yx[yorig] += 1 # keep track of the original word, too
           
         yxtuple = (y,x) # emission
 
@@ -96,7 +101,7 @@ class VisibleDataHMM:
   """ Return the tau_{y,x} for given y and x - or 0 if dne """
   def getTau(self, y, x):
     y = self._labelHash[y]
-    x = hash(x)
+    x = hash(self._unker.evaluateWord(x)) # check if x should be unked and hash
     return self._tau[(y,x)]
 
   """ Return a copy of the labels of this HMM """
@@ -110,6 +115,10 @@ class VisibleDataHMM:
   """ Return the trained internal distributions sigma and tau """
   def getDistribution(self):
     return (self._sigma, self._tau)
+
+  """ Return the number of unique words in this HMM's corpus """
+  def getWordCount(self):
+    return self._wc
 
   """ Return the transition/emission counts from the visible data.
       Converts n_y,y' and n_y,o to numpy arrays (nxn and 1xn resp.)

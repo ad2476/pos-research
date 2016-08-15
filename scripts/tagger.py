@@ -89,7 +89,6 @@ def setupVisibleModel(PreparserClass, UnkerClass, corpus):
   counts,wc = buildCounts(words)
   unker = UnkerClass(words,counts) # construct the unker (for unk substitution)
 
-  print counts
   return hmm.VisibleDataHMM(unker, tags, wc)
 
 if __name__ == '__main__':

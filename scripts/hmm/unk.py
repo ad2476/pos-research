@@ -61,7 +61,6 @@ class AbstractUnker:
         if self._counts[word] <= self._thresh:
           before = word
           word = self._categoriseUnk(word)
-          print before, word
 
         newl.append(word) # append this word (poss. with sub.)
 

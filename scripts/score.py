@@ -13,7 +13,6 @@ def parseProgramArgs():
   return parser.parse_args()
 
 def calculateAccuracy(filePreparser, correctFile, estimateFile):
-  
   numCorrect = 0.0
   total = 0.0
   for correct,estimate in itertools.izip(correctFile, estimateFile):
@@ -38,9 +37,9 @@ if __name__ == '__main__':
   outputFile = open(args.tagged, 'r')
 
   if args.lang == "EN":
-    FilePreparser = preparser.EnglishWSJParser(None)
+    FilePreparser = preparser.EnglishWSJParser
   elif args.lang == "SANS":
-    FilePreparser = preparser.SanskritJNUParser(None)
+    FilePreparser = preparser.SanskritJNUParser
 
   accuracy = calculateAccuracy(FilePreparser, testFile, outputFile)
   print accuracy

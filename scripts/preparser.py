@@ -36,11 +36,14 @@ class AbstractPreparser:
 
     return words
 
-  def getSentenceWords(self, line):
+  def writeCorpusWithoutTags(self, out):
     raise NotImplementedError('Subclasses must override this method!')
-  def getSentenceTags(self, line):
+  @staticmethod
+  def getSentenceWords(line):
     raise NotImplementedError('Subclasses must override this method!')
-
+  @staticmethod
+  def getSentenceTags(line):
+    raise NotImplementedError('Subclasses must override this method!')
   @staticmethod
   def formatOutput(words, tags):
     raise NotImplementedError('Subclasses must override this method!')
@@ -54,16 +57,18 @@ class EnglishWSJParser(AbstractPreparser):
     self._rawdata = inputData
     self._stopPair = STOP + " " + STOP
 
-  def getSentenceWords(self, line):
+  @staticmethod
+  def getSentenceWords(line):
     return line.split()[::2]
 
-  def getSentenceTags(self, line):
+  @staticmethod
+  def getSentenceTags(line):
     return line.split()[1::2]
 
   def writeCorpusWithoutTags(self, out):
     f = open(out, 'w')
     for line in self._rawdata:
-      words = self.getSentenceWords(line)
+      words = cls.getSentenceWords(line)
       for word in words:
         f.write("%s "%word)
       f.write("\n")
@@ -83,13 +88,23 @@ class SanskritJNUParser(AbstractPreparser):
     self._rawdata = inputData
     self._stopPair = "%s[%s]" % (STOP, STOP)
 
-  def getSentenceWords(self, line):
+  @staticmethod
+  def getSentenceWords(line):
     # each line is formatted: "WORD[TAG] WORD[TAG] WORD[TAG]DANDA[TAG]\n"
-    
+    #
     # capturing group before a literal '[' char:
     #  match at least 0 times,lazy, on a group consisting of:
     #   not whitespace, not a ']' char
     return re.findall(r"([^\s\]]*?)\[", line)
+
+  @staticmethod
+  def getSentenceTags(line):
+    # each line is formatted: "WORD[TAG] WORD[TAG] WORD[TAG]DANDA[TAG]\n"
+    #
+    # capturing group before a literal '[' char:
+    #  match at least 0 times,lazy, on a group consisting of:
+    #   not whitespace, not a ']' char
+    return re.findall(r"\[(.*?)\]", line)
 
   def writeCorpusWithoutTags(self, out):
     f = open(out, 'w')
@@ -99,14 +114,6 @@ class SanskritJNUParser(AbstractPreparser):
         f.write("%s "%word)
       f.write("\n")
     f.close()
-
-  def getSentenceTags(self, line):
-    # each line is formatted: "WORD[TAG] WORD[TAG] WORD[TAG]DANDA[TAG]\n"
-    
-    # capturing group before a literal '[' char:
-    #  match at least 0 times,lazy, on a group consisting of:
-    #   not whitespace, not a ']' char
-    return re.findall(r"\[(.*?)\]", line)
 
   @staticmethod
   def formatOutput(words, tags):

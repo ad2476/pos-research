@@ -221,8 +221,8 @@ cdef class HiddenDataHMM:
       start_distribution, start_expectations = visible_params
       self._sigma, self._tau = start_distribution
       exp_yx, exp_yy_, exp_ycirc = start_expectations # temporarily unpack these to weight them
-      # weight these expectation counts because they are more correct:
 
+      # weight these expectation counts because they are more correct:
       exp_yy_ = exp_yy_*weightFactor
       exp_ycirc = exp_ycirc*weightFactor
       for key,val in exp_yx.iteritems():

@@ -1,8 +1,8 @@
 import sys
 import argparse
-from collections import defaultdict
 
 import hmm
+import utils
 import decoder
 import preparser
 
@@ -34,51 +34,6 @@ def parseProgramArgs():
 
   return parser.parse_args()
 
-""" Build unigram counts from a corpus, aka n_w(d)
-    Inputs:
-      - document: An input corpus to build counts for
-    Returns:
-      - A tuple of counts (str->int) aka n_w(d)
-"""
-def buildCounts(document):
-  counts = defaultdict(int) # map string -> int: aka n_w(d)
-
-  # Populate n_w(d) aka counts dict
-  n_o = 0
-  for line in document:
-    words = line
-    for word in words:
-      counts[word] += 1
-      n_o += 1
-
-  return counts, n_o
-
-""" Given a list of filenames, concatenate contents into a list of sentences.
-    Each sentence is a string.
-"""
-def buildCorpus(files):
-  corpus = []
-  for fname in files:
-    f = open(fname, 'r')
-    corpus.extend([line for line in f])
-    f.close()
-
-  return corpus
-
-""" Build a tagset, given relevant cmdline args """
-def buildTags(args):
-  if args.tagfile:
-    tagfile = open(args.tagfile, 'r') # this is a file with tags separated by whitespace
-    tags = []
-    for line in tagfile:
-      tags.extend(line.split())
-    tagfile.close()
-    tags = set(tags)
-  else:
-    tags = set([str(i) for i in range(0, args.num_tags)])
-
-  return tags
-
 def setupVisibleModel(PreparserClass, UnkerClass, corpus):
   data = PreparserClass(corpus).parseWordsTags()
   if data is None:
@@ -86,7 +41,7 @@ def setupVisibleModel(PreparserClass, UnkerClass, corpus):
     sys.exit(1)
 
   words,tags = data
-  counts,wc = buildCounts(words)
+  counts,wc = utils.buildCounts(words)
   unker = UnkerClass(words,counts) # construct the unker (for unk substitution)
 
   return words, hmm.VisibleDataHMM(unker, tags, wc)
@@ -96,8 +51,8 @@ if __name__ == '__main__':
   args = parseProgramArgs()
   iter_cap = args.iter or DFLT_ITER_CAP
 
-  trainData = buildCorpus(args.train)
-  testData = buildCorpus(args.test)
+  trainData = utils.buildCorpus(args.train)
+  testData = utils.buildCorpus(args.test)
 
   outFile = open(args.output, 'w')
 
@@ -118,8 +73,8 @@ if __name__ == '__main__':
     if words is None:
       sys.stderr.write("Error parsing input: Bad format.\n")
 
-    counts,wc = buildCounts(words) # build counts dict
-    tagset = buildTags(args) # build a tagset from either tagfile or int range
+    counts,wc = utils.buildCounts(words) # build counts dict
+    tagset = utils.buildTags(args) # build a tagset from either tagfile or int range
     unker = UnkerClass(words,counts)
     model = hmm.HiddenDataHMM(unker, tagset, wc) # initialise the model
     params = (iter_cap, None)
@@ -132,13 +87,13 @@ if __name__ == '__main__':
       sys.stderr.write("--extra must be specified if --model=semisuper\n")
       sys.exit(1)
 
-    unlabeledData = buildCorpus(args.extra)
+    unlabeledData = utils.buildCorpus(args.extra)
     extraWords = FilePreparser(unlabeledData).parseWords() # preparse unlabeled data
     if extraWords is None:
       sys.stderr.write("Error parsing extra input: Bad format.\n")
       sys.exit(1)
 
-    counts,wc = buildCounts(extraWords+words) # build counts from the labeled and unlabeled data
+    counts,wc = utils.buildCounts(extraWords+words) # build counts from the labeled and unlabeled data
     tagset = visibleModel.getLabels() # get the tags from visible data
     labelMapper = visibleModel.getLabelHash() # get the mapping of label:str -> label:int
 
@@ -152,11 +107,10 @@ if __name__ == '__main__':
   viterbi = decoder.ViterbiDecoder(model)
 
   # decode the test file:
-  prep = FilePreparser(testData)
   for line in testData:
-    sentence = prep.getSentenceWords(line)
+    sentence = FilePreparser.getSentenceWords(line)
     yhat = viterbi.decode(sentence)
-    tagged = prep.formatOutput(sentence, yhat)
+    tagged = FilePreparser.formatOutput(sentence, yhat)
     outFile.write(tagged+"\n")
 
   outFile.close()

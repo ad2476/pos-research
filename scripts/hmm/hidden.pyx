@@ -14,22 +14,29 @@ cimport numpy as np
 
 """ A Hidden Markov Model constructed from hidden (unlabeled) data """
 cdef class HiddenDataHMM:
-  cdef public _sentences, _states, _labelHash, _sigma, _tau, _smooth
+  cdef public _outputs, _unker, _states, _labelHash, _sigma, _tau, _smooth
   cdef int _ITER_CAP, _numStates, _wc
   cdef public int _STOPTAG
-  cdef float _alpha
+  cdef double _alpha, _WEIGHTCOEF
 
-  """ Construct the HMM object using a list of outputs and a set of posLabels. """
-  def __init__(self, outputs, posLabels, wordCount, labelHash=None):
+  """ Construct the HMM from:
+        unker: A subclass inheriting from AbstractUnker
+        tagset: A set containing the POS tags used by this model
+        wordCount: count of unique words in the corpus
+        labelHash: (optional) maps a string label to an internal int index,
+                   required if this HiddenDataHMM is used to supplement a
+                   VisibleDataHMM in a semi-supervised fashion.
+  """
+  def __init__(self, unker, tagset, wordCount, labelHash=None):
     # hash to create an array of ints
-    self._sentences = [[hash(x) for x in sentence] for sentence in outputs]
-    self._numStates = len(posLabels)
+    self._outputs = [[hash(x) for x in sentence] for sentence in unker.getUnkedCorpus()]
+    self._unker = unker
+    self._numStates = len(tagset)
     self._states = range(0, self._numStates) # faster np.array indexing
     self._wc = wordCount
 
     # labelHash maps the string label name to an internal int index
-    self._labelHash = labelHash or common.makeLabelHash(posLabels)
-
+    self._labelHash = labelHash or common.makeLabelHash(tagset)
     self._STOPTAG = self._labelHash[STOP] # which one is the stop tag?
 
     # initialise sigmas as random matrix
@@ -40,6 +47,11 @@ cdef class HiddenDataHMM:
     self._alpha = 1.0
     self._smooth = lambda: self._alpha/self._wc
     self._tau = defaultdict(self._smooth)
+
+    # the weight coefficient provides a way to scale how the counts derived
+    #  from visible (POS-labeled) data are weighted rel. to the size of the
+    #  unlabeled corpus
+    self._WEIGHTCOEF = 20.0 # guesstimate
 
   """ Compute alphas for this timestep.
         alpha: n x m slice of the alphaBetaMat (n words by m states)
@@ -126,8 +138,8 @@ cdef class HiddenDataHMM:
     ALPHA, BETA = 0, 1 # indices
 
     s = 1
-    n_sentence = len(self._sentences) 
-    for sentence in self._sentences:
+    n_sentence = len(self._outputs) 
+    for sentence in self._outputs:
       print "- sentence: %i of %i \t\t (iteration %i/%i)"%(s,n_sentence,iteration,iter_cap)
       sys.stdout.flush()
       s+=1
@@ -195,9 +207,13 @@ cdef class HiddenDataHMM:
       self._tau[emission] = (expectation+alpha)/(expected_ycirc[y] + alpha*self._numStates)
 
   cdef void _train(self, int ITER_CAP, tuple visible_params):
-    cdef int i = 1
+    cdef int i = 1 # counts iterations of EM
     cdef double[:,:] e_yy_ # E[n_{y,y'}|x]: (y,y')->float
     cdef double[:] e_ycirc # E[n_{y,\circ}|x]: y->float
+
+    # this weight factor affects how much the counts derived from labeled training data
+    #  should be weighted, as a function of the size of the unlabeled training data:
+    cdef double weightFactor = self._WEIGHTCOEF*np.log(len(self._outputs)+np.e**(1/self._WEIGHTCOEF))
 
     print "Beginning train iterations (EM)..."
     start_expectations = defaultdict(float), np.zeros([self._numStates]*2), np.zeros(self._numStates)
@@ -206,10 +222,11 @@ cdef class HiddenDataHMM:
       self._sigma, self._tau = start_distribution
       exp_yx, exp_yy_, exp_ycirc = start_expectations # temporarily unpack these to weight them
       # weight these expectation counts because they are more correct:
-      exp_yy_ = exp_yy_*100.0
-      exp_ycirc = exp_ycirc*100.0
+
+      exp_yy_ = exp_yy_*weightFactor
+      exp_ycirc = exp_ycirc*weightFactor
       for key,val in exp_yx.iteritems():
-        exp_yx[key] = val*100.0
+        exp_yx[key] = val*weightFactor
 
       self._tau._wc = self._wc # update taudict's internal wordcount
       self._alpha = self._tau._alpha
@@ -248,7 +265,7 @@ cdef class HiddenDataHMM:
   """ Compute tau_{y,x} - emission prob. of state y->output x """
   def getTau(self, y, x):
     y = self._labelHash[y]
-    x = hash(x)
+    x = hash(self._unker.evaluateWord(x)) # check if x should be unked and hash
     return self._tau[(y,x)]
 
   """ Return a copy of the model's labels """
@@ -263,3 +280,6 @@ cdef class HiddenDataHMM:
   def getDistribution(self):
     return (np.copy(self._sigma), dict(self._tau))
 
+  """ Return the number of unique words in this HMM's corpus """
+  def getWordCount(self):
+    return self._wc

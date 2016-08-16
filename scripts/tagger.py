@@ -89,7 +89,7 @@ def setupVisibleModel(PreparserClass, UnkerClass, corpus):
   counts,wc = buildCounts(words)
   unker = UnkerClass(words,counts) # construct the unker (for unk substitution)
 
-  return hmm.VisibleDataHMM(unker, tags, wc)
+  return words, hmm.VisibleDataHMM(unker, tags, wc)
 
 if __name__ == '__main__':
 
@@ -111,19 +111,20 @@ if __name__ == '__main__':
 
   # Set up models depending on the type:
   if args.model == "super":
-    model = setupVisibleModel(FilePreparser, UnkerClass, trainData)
+    _,model = setupVisibleModel(FilePreparser, UnkerClass, trainData)
     params = DFLT_ALPHA # alpha smoothing
   elif args.model == "unsuper":
-    words = FilePreparser(trainData).parseWords()
+    words = FilePreparser(trainData).parseWords() # get corpus as list of sentences
     if words is None:
       sys.stderr.write("Error parsing input: Bad format.\n")
 
-    counts,wc = buildCounts(words)
-    tagset = buildTags(args)
-    model = hmm.HiddenDataHMM(words, tagset, wc)
+    counts,wc = buildCounts(words) # build counts dict
+    tagset = buildTags(args) # build a tagset from either tagfile or int range
+    unker = UnkerClass(words,counts)
+    model = hmm.HiddenDataHMM(unker, tagset, wc) # initialise the model
     params = (iter_cap, None)
   else: # model is semi-supervised
-    visibleModel = setupVisibleModel(FilePreparser, UnkerClass, trainData) # now we have a visible model
+    words,visibleModel = setupVisibleModel(FilePreparser, UnkerClass, trainData) # now we have a visible model
     visibleModel.train(DFLT_ALPHA) # build the counts from the visible model
 
     params = (iter_cap, (visibleModel.getDistribution(), visibleModel.getVisibleCounts()))
@@ -132,18 +133,19 @@ if __name__ == '__main__':
       sys.exit(1)
 
     unlabeledData = buildCorpus(args.extra)
-
     extraWords = FilePreparser(unlabeledData).parseWords() # preparse unlabeled data
     if extraWords is None:
       sys.stderr.write("Error parsing extra input: Bad format.\n")
       sys.exit(1)
 
-    _,wc = buildCounts(extraWords) # build counts from the extra data
-    wc += visibleModel.getWordCount() # add the word counts from the tagged corpus
+    counts,wc = buildCounts(extraWords+words) # build counts from the labeled and unlabeled data
     tagset = visibleModel.getLabels() # get the tags from visible data
     labelMapper = visibleModel.getLabelHash() # get the mapping of label:str -> label:int
 
-    model = hmm.HiddenDataHMM(extraWords, tagset, wc, visibleModel.getLabelHash())
+    # build a new unker whose corpus is only unlabeled data, but whose counts include
+    #  those of labeled data:
+    unker = UnkerClass(extraWords,counts)
+    model = hmm.HiddenDataHMM(unker, tagset, wc, visibleModel.getLabelHash()) # boom, we got a model
 
   model.train(params) # train our model with the given training parameters
 

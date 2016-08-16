@@ -107,42 +107,42 @@ class PratyayaUnker(AbstractUnker):
     _asya, Uasya = "asya", "*Uasya*" # 6. vibhakti sing. -a stem
     _ena, _eNa, Uena = "ena", "e\xe1\xb9\x87a", "*Uena*" # 3. vibhakti sing. -a stem
     _Su, _su, Usu = "\xe1\xb9\xa3u", "su", "*Usu*" # 7. vibhakti plu. -su/-ṣu represent the same form
-    _as, Uas = "ah\xcc\xa3", "*Uas*" # 1s/1p/2p/5s/6s/etc -aḥ is a common inflectional ending
-    _As, UAs = "\xc4\x81h\xcc\xa3", "*UAs*" # 1p/etc -āḥ also a common inflectional ending
+    _as, Uas = "a\xe1\xb8\xa5", "*Uas*" # 1s/1p/2p/5s/6s/etc -aḥ is a common inflectional ending
+    _As, UAs = "\xc4\x81\xe1\xb8\xa5", "*UAs*" # 1p/etc -āḥ also a common inflectional ending
     _am, _aM, Uam = "am", "am\xcc\xa3", "*Uam*" # 1s/2s
-    _Am, _AM, UAm = "\xc4\x81m", "\xc4\x81m\xcc\xa3", "*UAm*" # 2s/6p/etc
+    _Am, _AM, UAm = "\xc4\x81m", "\xc4\x81\xe1\xb9\x83", "*UAm*" # 2s/6p/etc
     _au, Uau = "au", "*Uau*" # 1d/2d/etc
-    _is, Uis = "ih\xcc\xa3", "*Uis*"
-    _os, Uos = "oh\xcc\xa3", "*Uos*"
+    _is, Uis = "i\xe1\xb8\xa5", "*Uis*"
+    _os, Uos = "o\xe1\xb8\xa5", "*Uos*"
     _At, UAt = "\xc4\x81t", "*UAt*" # 5. vibhakti sing. -a stem
     _at, Uat = "at", "*Uat*" # mostly seen in parasmai-/ātmanepada 3s verb forms?
     _vA, _tyA, UvA = "v\xc4\x81", "ty\xc4\x81", "*UvA*" # gerunds often end in -vā or -tyā
     _A, UA = "\xc4\x81", "*UA*" # e.g. kanyā, rājā, etc.
     _e, Ue = "e", "*Ue*" # 7. vibh. sing. -a stem, or vocatives etc
-    _s, Us = "h\xcc\xa3", "*Us*" # consonant stem ending -ḥ
+    _s, Us = "\xe1\xb8\xa5", "*Us*" # consonant stem ending -ḥ
     _i, Ui = "i", "*Ui*" # 7. vibh. sing.
     _I, UI = "\xc4\xab", "*UI*" # 1. vibh. sing. fem.
 
     wordEnds = lambda w,s: w[-len(s):] == s
 
     self._rulesList = [(lambda w: wordEnds(w, _asya), Uasya),
-                      (lambda w: wordEnds(w, _ena) or wordEnds(w, _eNa), Uena),
-                      (lambda w: wordEnds(w, _su) or wordEnds(w, _Su), Usu),
-                      (lambda w: wordEnds(w, _as), Uas),
-                      (lambda w: wordEnds(w, _As), UAs),
-                      (lambda w: wordEnds(w, _am) or wordEnds(w, _aM), Uam),
-                      (lambda w: wordEnds(w, _Am) or wordEnds(w, _AM), UAm),
-                      (lambda w: wordEnds(w, _au), Uau),
-                      (lambda w: wordEnds(w, _is), Uis),
-                      (lambda w: wordEnds(w, _os), Uos),
-                      (lambda w: wordEnds(w, _At), UAt),
-                      (lambda w: wordEnds(w, _at), Uat),
-                      (lambda w: wordEnds(w, _vA) or wordEnds(w, _tyA), UvA),
-                      (lambda w: wordEnds(w, _A), UA),
-                      (lambda w: wordEnds(w, _e), Ue),
-                      (lambda w: wordEnds(w, _s), Us),
-                      (lambda w: wordEnds(w, _i), Ui),
-                      (lambda w: wordEnds(w, _I), UI)]
+                       (lambda w: wordEnds(w, _ena) or wordEnds(w, _eNa), Uena),
+                       (lambda w: wordEnds(w, _su) or wordEnds(w, _Su), Usu),
+                       (lambda w: wordEnds(w, _as), Uas),
+                       (lambda w: wordEnds(w, _As), UAs),
+                       (lambda w: wordEnds(w, _am) or wordEnds(w, _aM), Uam),
+                       (lambda w: wordEnds(w, _Am) or wordEnds(w, _AM), UAm),
+                       (lambda w: wordEnds(w, _au), Uau),
+                       (lambda w: wordEnds(w, _is), Uis),
+                       (lambda w: wordEnds(w, _os), Uos),
+                       (lambda w: wordEnds(w, _At), UAt),
+                       (lambda w: wordEnds(w, _at), Uat),
+                       (lambda w: wordEnds(w, _vA) or wordEnds(w, _tyA), UvA),
+                       (lambda w: wordEnds(w, _A), UA),
+                       (lambda w: wordEnds(w, _e), Ue),
+                       (lambda w: wordEnds(w, _s), Us),
+                       (lambda w: wordEnds(w, _i), Ui),
+                       (lambda w: wordEnds(w, _I), UI)]
 
 """ A basic Unker class that uses only one UNK category. Also a reference
     implementation for AbstractUnker.

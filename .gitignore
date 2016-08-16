@@ -3,7 +3,8 @@
 
 .DS_Store
 
-tagged*
+output.txt
+tmp.txt
 debug.txt
 
 debug/*

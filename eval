@@ -43,7 +43,7 @@ if [ $# -eq "4" ]; then
   if [[ "${4}" -eq "SANS" ]]; then # check if we should be in sanskrit mode
     TRAIN="data/sans/JNUTaggedTrainIAST.txt"
     TEST="data/sans/JNUTagsetTestIAST.txt"
-    NOTAGS="data/sans/sivamahimnastava.txt"
+    NOTAGS="data/sans/GRETILNoTagsTrain.txt"
     lang="SANS"
   elif [[ "${4}" -ne "EN" ]]; then
     echo "$4 is not a valid language option."

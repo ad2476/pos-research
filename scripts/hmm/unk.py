@@ -104,6 +104,8 @@ class PratyayaUnker(AbstractUnker):
        of rules to be specified on a per-class basis.
   """
   def _abstractGuard(self):
+    _tavya, Utavya = "tavya", "*Utavya*" # gerundive e.g. kartavya
+    _nIya, _NIya, UnIya = "n\xc4\xabya", "\xe1\xb9\x87\xc4\xabya", "*UnIya*" # gerundive e.g. karaṇīya
     _asya, Uasya = "asya", "*Uasya*" # 6. vibhakti sing. -a stem
     _ena, _eNa, Uena = "ena", "e\xe1\xb9\x87a", "*Uena*" # 3. vibhakti sing. -a stem
     _Su, _su, Usu = "\xe1\xb9\xa3u", "su", "*Usu*" # 7. vibhakti plu. -su/-ṣu represent the same form
@@ -125,7 +127,9 @@ class PratyayaUnker(AbstractUnker):
 
     wordEnds = lambda w,s: w[-len(s):] == s
 
-    self._rulesList = [(lambda w: wordEnds(w, _asya), Uasya),
+    self._rulesList = [(lambda w: wordEnds(w, _tavya), Utavya),
+                       (lambda w: wordEnds(w, _nIya) or wordEnds(w, _NIya), UnIya),
+                       (lambda w: wordEnds(w, _asya), Uasya),
                        (lambda w: wordEnds(w, _ena) or wordEnds(w, _eNa), Uena),
                        (lambda w: wordEnds(w, _su) or wordEnds(w, _Su), Usu),
                        (lambda w: wordEnds(w, _as), Uas),

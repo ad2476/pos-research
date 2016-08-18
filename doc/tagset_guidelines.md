@@ -79,14 +79,14 @@ Much like for noun tags, following the main verb tag are person and number sub-t
 
 | Tag | Description |
 | --- | ----------- |
-| laTV | Vartamāna (Present tense) |
-| liTB | Bhūta (Past perfect tense) |
-| luTAg | Āgāmī (Periphrastic future) |
-| lRuTAg | Āgāmī (Future tense) |
-| loTA | Ājñā (Imperative) |
-| la~gB | Bhūta (Past imperfect tense) |
-| li~gVi | Vidhi (Optative) |
-| lu~gB | Bhūta (Past aorist tense) |
+| **laTV** | Vartamāna (Present tense) |
+| **liTB** | Bhūta (Past perfect tense) |
+| **luTAg** | Āgāmī (Periphrastic future) |
+| **lRuTAg** | Āgāmī (Future tense) |
+| **loTA** | Ājñā (Imperative) |
+| **la~gB** | Bhūta (Past imperfect tense) |
+| **li~gVi** | Vidhi (Optative) |
+| **lu~gB** | Bhūta (Past aorist tense) |
 
 *Example*: `vahati[laTV_1.1]` (laT-lakAra-prathamapuruṣa-ekavacana)
 
@@ -94,15 +94,15 @@ Much like for noun tags, following the main verb tag are person and number sub-t
 
 | Tag | Description |
 | --- | ----------- |
-| AV  | Avyaya (particles e.g. atha, iva, saha) |
-| AVN | Avyaya niṣedhārthaka (e.g. na, mā) |
-| AVC | Conjunctive avyaya (e.g. ca, tu) |
-| AVD | Disjunctive avyaya (e.g. vā) |
-| AVP | Avyaya praśnārthika (interrogatives e.g. api) |
-| AVT | Avyaya tumunnanta (infinitives e.g. gantum) |
-| AVG | Avyaya ktvānta/lyabanta (gerunds e.g. gatvā, avalambya) |
-| AVKV | Avyaya kriyāviśeṣaṇa (adverbs) |
-| UD | Udgara (interjection e.g. hā, bho) |
+| **AV**  | Avyaya (particles e.g. atha, iva, saha) |
+| **AVN** | Avyaya niṣedhārthaka (e.g. na, mā) |
+| **AVC** | Conjunctive avyaya (e.g. ca, tu) |
+| **AVD** | Disjunctive avyaya (e.g. vā) |
+| **AVP** | Avyaya praśnārthika (interrogatives e.g. api) |
+| **AVT** | Avyaya tumunnanta (infinitives e.g. gantum) |
+| **AVG** | Avyaya ktvānta/lyabanta (gerunds e.g. gatvā, avalambya) |
+| **AVKV** | Avyaya kriyāviśeṣaṇa (adverbs) |
+| **UD** | Udgara (interjection e.g. hā, bho) |
 
 ##Punctuation tags:
 
@@ -110,12 +110,13 @@ Many punctuation tags have been condensed into the following two:
 
 | Tag | Description |
 | --- | ----------- |
-| PUN\_VV | Vākya virāma (sentence end, half śloka, comma, question mark, etc.) |
-| PUN\_SA | Ślokānta (śloka end marker) |
+| **PUN\_VV** | Vākya virāma (sentence end, half śloka, question mark, etc.) |
+| **PUN\_LV** | Laghu virāma (comma, semicolon) |
+| **PUN\_SA** | Ślokānta (śloka end marker) |
 
 ##Other tags:
 
 | Tag | Description |
 | --- | ----------- |
-| AB | anyabhāṣā (foreign word) |
+| **AB** | anyabhāṣā (foreign word) |
 

@@ -41,8 +41,8 @@ lang="EN"
 # if a 4th arg is passed
 if [ $# -eq "4" ]; then
   if [[ "${4}" -eq "SANS" ]]; then # check if we should be in sanskrit mode
-    TRAIN="data/sans/JNUTaggedTrainIAST.txt"
-    TEST="data/sans/JNUTagsetTestIAST.txt"
+    TRAIN="data/sans/train.txt"
+    TEST="data/sans/test.txt"
     NOTAGS="data/sans/GRETILNoTagsTrain.txt"
     lang="SANS"
   elif [[ "${4}" -ne "EN" ]]; then

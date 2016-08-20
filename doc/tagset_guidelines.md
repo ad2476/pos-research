@@ -71,9 +71,9 @@ Much like for noun tags, following the main verb tag are person and number sub-t
 | **luTAg** | Āgāmī (Periphrastic future) |
 | **lRuTAg** | Āgāmī (Future tense) |
 | **loTA** | Imperative |
-| **la~gB** | Bhūta (Past imperfect tense) |
-| **li~gVi** | Vidhyādi (Optative) |
-| **lu~gB** | Bhūta (Past aorist tense) |
+| **langB** | Bhūta (Past imperfect tense) |
+| **lingVi** | Vidhyādi (Optative) |
+| **lungB** | Bhūta (Past aorist tense) |
 
 *Example*: `vahati[laTV_1.1]` (Present tense, first person, singular)
 

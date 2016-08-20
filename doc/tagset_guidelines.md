@@ -75,7 +75,7 @@ Much like for noun tags, following the main verb tag are person and number sub-t
 | **lingVi** | Vidhyādi (Optative) |
 | **lungB** | Bhūta (Past aorist tense) |
 
-*Example*: `vahati[laTV_1.1]` (Present tense, first person, singular)
+*Example*: `vahati[laTV_3.1]` (Present tense, third person, singular)
 
 ##Avyaya (Particle) tags:
 

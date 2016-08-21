@@ -47,3 +47,22 @@ def buildTags(args):
 
   return set(tags)
 
+""" Function for building a tagset from a labeled corpus and writing it to a file
+      preparser: A preparser inheriting from preparser.AbstractPreparser, initialised with a corpus
+      fname: Filename of destination file
+    Returns: A set of tags, i.e. a collection of tag classes present in the labeled data
+"""
+def writeTagsetToFile(preparser, fname):
+  tagset = set()
+
+  _, tags = preparser.parseWordsTags()
+  for line in tags:
+    for tag in line:
+      tagset.add(tag)
+
+  f = open(fname, "w")
+  for tag in tagset:
+    f.write("%s\n"%tag) # one tag per line
+
+  f.close()
+

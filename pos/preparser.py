@@ -8,7 +8,7 @@ from hmm import STOP
 """
 class AbstractPreparser:
 
-  def __init__(self):
+  def __init__(self, inputData):
     raise NotImplementedError('Subclasses must override this method!')
 
   """ Parse the outputs and tags into separate lists. """

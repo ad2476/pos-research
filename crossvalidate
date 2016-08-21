@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Cross-validates the model by doing the following:
+# For line in range l-N for N total lines of labeled data:
+#   use line as test corpus, rest as train
+#   train model, appending tagged output (of line) to file
+# test, comparing gold corpus to total tagged output of each of the above iterations
+#  display accuracy score and confusion matrix
+
+# Usage: ./crossvalidate [tagger_args]
+# where tagger_args excludes --train, --test, --output and --lang (since those are set by this script)
+
+DATADIR="data/sans"
+GOLD="${DATADIR}/TaggedCorpus.txt"
+TMP="data/output.txt" # each iteration writes (without appending) tagged output to this file
+OUTPUT="data/tagged.txt" # where all the tagged output is appended to
+LANG="SANS"
+
+size=( $(wc -l "${GOLD}") ) # get size of labeled corpus
+
+# remove tagged output file:
+if [ -e "${OUTPUT}" ]; then
+  rm -i "${OUTPUT}" # ask for confirmation
+fi
+
+# run for each line in labeled corpus
+printf "Progress: "
+for i in $( seq 1 $size); do
+  progress=$(($i*100/$size))
+  printf "$progress%%"
+  tools/corpus.py -l $i "${GOLD}" "${DATADIR}" # make the train/test files
+  ./tagger.py --lang ${LANG} --train "${DATADIR}/train.txt" --test "${DATADIR}/test.txt"  --output "${TMP}" $@
+  if [ $? -ne "0" ]; then # there was an error
+    exit 1
+  fi
+  cat "${TMP}" >> "${OUTPUT}"
+
+  if (( $progress < 10 )); then
+    printf "\b\b  \b\b" # erase only 2 chars
+  else
+    printf "\b\b\b   \b\b\b" # erase 3 chars 
+  fi
+done
+printf "\btagging complete.\n"
+
+# finally, score model:
+./score.py -v --lang ${LANG} --accuracy --confusion ${GOLD} ${OUTPUT}
+

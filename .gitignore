@@ -4,6 +4,9 @@
 .DS_Store
 
 output.txt
+tagged.txt
+test.txt
+train.txt
 tmp.txt
 debug.txt
 

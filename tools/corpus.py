@@ -1,36 +1,26 @@
 #!/usr/bin/env python2
 
 import sys
+import argparse
 from os import path
 import numpy as np
 
-# assumes l is sorted ascending (low to high)
-# Returns True if value is in list l, False otherwise
-def binarySearchFor(value, l):
-  if len(l) == 0: # l is empty
-    return False
-  
-  pivot = len(l)/2
-  pivotVal = l[pivot]
+def parseProgramArgs():
+  parser = argparse.ArgumentParser(description="Split a corpus into test/train documents.")
+  parser.add_argument("corpus", help="Path to corpus")
+  parser.add_argument("output_dir", help="Directory into which to output train.txt and test.txt")
+  mutexgroup = parser.add_mutually_exclusive_group(required=True)
+  mutexgroup.add_argument("-l", "--line", type=int, help="Line number in corpus to use as test (for cross-validation)")
+  mutexgroup.add_argument("-r", "--ratio", type=float, help="Ratio of corpus to use as test (random subset)")
+  mutexgroup.add_argument("-n", "--size", type=int, help="Size of test corpus, by line count (random subset)")
 
-  if value < pivotVal:
-    return binarySearchFor(value, l[:pivot]) # search left
-
-  if value > pivotVal:
-    return binarySearchFor(value, l[(pivot+1):]) # search right
-
-  return True # value == pivotVal
+  return parser.parse_args()
 
 if __name__ == '__main__':
+  args = parseProgramArgs()
 
-  if len(sys.argv) != 4:
-    sys.stderr.write("Usage: python2 corpus.py CORPUSFILE DESTDIR RATIO \n")
-    sys.stderr.write("  e.g. `python2 corpus.py data/sans/TaggedCorpus.txt data/sans/ 0.2` creates a sans/train.txt and sans/test.txt, with the test 20% of CORPUS and the train 80% of CORPUS")
-    sys.exit(1)
-
-  fname = sys.argv[1] # tagged corpus
-  destdir = sys.argv[2] # destination directory
-  r = float(sys.argv[3]) # ratio
+  fname = args.corpus
+  destdir = args.output_dir
 
   f = open(fname, "r") # open the corpus for reading
   trainF = open(path.join(destdir, "train.txt"), "w")
@@ -39,17 +29,33 @@ if __name__ == '__main__':
   corpus = [l for l in f]
 
   N = len(corpus)
-  test_size = int(N*r) # number of lines in test corpus
-  lines = np.random.random_integers(low=0,high=N-1,size=test_size)
+  if args.size or args.ratio: # Want to randomly select some number of lines into test/train:
+    if args.size:
+      test_size = args.size # this is how many lines we want in the test corpus
+    else: # otherwise, we're going by ratio:
+      test_size = int(N*args.ratio) # number of lines in test corpus
 
-  for i in lines:
-    testF.write(corpus[i])
+    # randomly select $test_size line numbers in range 0,N-1
+    lines = np.random.random_integers(low=0,high=N-1,size=test_size)
+    for i in lines: # use these for the test corpus:
+      testF.write(corpus[i])
 
-  lines.sort()
+    # next, put the rest of the lines in the train corpus:
+    for i in xrange(0,N):
+      if not i in lines: # i cannot be in list of indices used for test
+        trainF.write(corpus[i])
+  else: # we just select a single line from the corpus for our test corpus:
+    line = args.line - 1 # account for 0-indexing
+    if line > N:
+      sys.stderr.write("Line out of bounds! (%d lines in corpus)\n"%N)
+      sys.exit(1)
 
-  for i in xrange(0,N):
-    if not binarySearchFor(i, lines): # i cannot be in list of indices used for test
-      trainF.write(corpus[i])
+    testF.write(corpus[line]) # write this line to the test corpus
+
+    # write all other lines to train corpus:
+    for i in xrange(0,N):
+      if i != line:
+        trainF.write(corpus[i])
 
   f.close()
   trainF.close()

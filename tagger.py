@@ -1,10 +1,9 @@
+#!/usr/bin/env python2
+
 import sys
 import argparse
 
-import hmm
-import utils
-import decoder
-import preparser
+from pos import hmm, utils, decoder, preparser
 
 DFLT_ITER_CAP = 1
 DFLT_ALPHA = 1.0 # for now, this is only hardcoded

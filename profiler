@@ -1,10 +1,12 @@
 #!/bin/bash
 
+# NOTE: This profiler might be less useful now that the computationally-heavy calls are compiled to C
+
 training=$1
 testdata=$2
 output=$3
 
-python2 -m cProfile -o debug/stats scripts/tagger.py $training $testdata $output --better_tag
+python2 -m cProfile -o debug/stats pos/tagger.py $training $testdata $output --better_tag
 
-python2 scripts/profile.py | less
+python2 tools/profile.py | less
 

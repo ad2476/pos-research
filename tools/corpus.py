@@ -1,4 +1,7 @@
+#!/usr/bin/env python2
+
 import sys
+from os import path
 import numpy as np
 
 # assumes l is sorted ascending (low to high)
@@ -20,17 +23,18 @@ def binarySearchFor(value, l):
 
 if __name__ == '__main__':
 
-  if len(sys.argv) != 3:
-    sys.stderr.write("Usage: python corpus.py CORPUS RATIO\n")
-    sys.stderr.write("  e.g. `python corpus.py sans/TaggedCorpus.txt 0.2` creates a test and train file, with the test 20% of CORPUS and the train 80% of CORPUS")
+  if len(sys.argv) != 4:
+    sys.stderr.write("Usage: python2 corpus.py CORPUSFILE DESTDIR RATIO \n")
+    sys.stderr.write("  e.g. `python2 corpus.py data/sans/TaggedCorpus.txt data/sans/ 0.2` creates a sans/train.txt and sans/test.txt, with the test 20% of CORPUS and the train 80% of CORPUS")
     sys.exit(1)
 
   fname = sys.argv[1] # tagged corpus
-  r = float(sys.argv[2]) # ratio
+  destdir = sys.argv[2] # destination directory
+  r = float(sys.argv[3]) # ratio
 
   f = open(fname, "r") # open the corpus for reading
-  trainF = open("train.txt", "w")
-  testF = open("test.txt", "w")
+  trainF = open(path.join(destdir, "train.txt"), "w")
+  testF = open(path.join(destdir, "test.txt"), "w")
 
   corpus = [l for l in f]
 

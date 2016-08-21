@@ -80,8 +80,8 @@ printf "\t• ${tsize[0]} lines labeled training data, ${testsize[0]} lines of t
 printf "\t• Up to ${len[0]} lines unlabeled training data, incrementing by ${step_size} lines.\n"
 printf "\t• ${iter} iterations of EM.\n"
 printf "\nSupervised baseline accuracy : "
-./tag --lang ${lang} --model super --train ${TRAIN} --test ${TEST} --output ${OUT} >"${OUTPUT_DIR}/supervised_stdout.txt" 2>"${OUTPUT_DIR}/supervised_stderr.txt"
-printf "$( ./score --lang ${lang} ${TEST} ${OUT} )\n"
+./tagger.py --lang ${lang} --model super --train ${TRAIN} --test ${TEST} --output ${OUT} >"${OUTPUT_DIR}/supervised_stdout.txt" 2>"${OUTPUT_DIR}/supervised_stderr.txt"
+printf "$( ./score.py --lang ${lang} ${TEST} ${OUT} )\n"
 
 printf "\nSemi-supervised accuracy:\n"
 
@@ -94,8 +94,8 @@ for i in $( seq 0 ${step_size} ${len[0]} ); do
     head -n $i ${NOTAGS} > ${EXTRA}
   fi
 
-  ./tag --lang ${lang} --model semisuper --iter $iter --train ${TRAIN} --test ${TEST} --output ${OUT} --extra ${EXTRA} >"${OUTPUT_DIR}/semisupervised_stdout.txt" 2>"${OUTPUT_DIR}/semisupervised_stderr.txt"
-  score=$( ./score --lang ${lang} ${TEST} ${OUT} )
+  ./tagger.py --lang ${lang} --model semisuper --iter $iter --train ${TRAIN} --test ${TEST} --output ${OUT} --extra ${EXTRA} >"${OUTPUT_DIR}/semisupervised_stdout.txt" 2>"${OUTPUT_DIR}/semisupervised_stderr.txt"
+  score=$( ./score.py --lang ${lang} ${TEST} ${OUT} )
   printf "${score}\n"
 
   # log to file:

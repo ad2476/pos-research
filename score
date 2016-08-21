@@ -1,4 +1,0 @@
-#!/bin/bash
-
-# For documentation, see ./score --help
-python2 scripts/score.py $@

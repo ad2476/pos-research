@@ -14,11 +14,11 @@ This research project aims to address a foremost issue with POS tagging for Sans
 
 The `master` branch of this repository represents the most stable iteration of the model. As of the latest update to this README, this is a (relatively) stable implementation of an HMM trained solely from visible data.
 
-Other branches may be created as development continues to preserve master as stable and allow possibly unstable development on those branches.
+The `devel` branch is less stable and contains possibly breaking changes that will eventually be merged into master once functioning.
 
 ## Running the train/test/score routine of the tagger:
 
 Train the tagger, and tag the words from the test corpus. Then, run the scorer on the tagged output, against the "gold" test corpus to evaluate word-level tag accuracy.
 
-For now, the best documentation on how to do this can be found by running `./tag --help` and `./score --help`. Documentation is a WIP.
+For now, the best documentation on how to do this can be found by running `./tagger.py --help` and `./score.py --help`. Documentation is a WIP.
 

@@ -9,18 +9,40 @@
 
 # Usage: ./crossvalidate [tagger_args]
 # where tagger_args excludes --train, --test, --output and --lang (since those are set by this script)
+# Tagging language defaults to Sanskrit, but can be specified as an environment variable e.g.
+#   MODEL_LANG="EN" ./crossvalidate [...]
 
-DATADIR="data/sans"
+if [ "$MODEL_LANG" == "" ]; then
+  MODEL_LANG="SANS" # DEFAULT TAGGING LANGUAGE
+fi
+
+if [ "$MODEL_LANG" == "SANS" ]; then
+  DATADIR="data/sans"
+  echo "Tagging Sanskrit text..."
+elif [ "$MODEL_LANG" == "EN" ]; then
+  DATADIR="data/en"
+  echo "Tagging English text..."
+else
+  echo "Invalid language option!"
+  exit 2
+fi
+
 GOLD="${DATADIR}/TaggedCorpus.txt"
+TAGSET="${DATADIR}/tagset.txt"
 TMP="data/output.txt" # each iteration writes (without appending) tagged output to this file
 OUTPUT="data/tagged.txt" # where all the tagged output is appended to
-LANG="SANS"
 
 size=( $(wc -l "${GOLD}") ) # get size of labeled corpus
 
 # remove tagged output file:
 if [ -e "${OUTPUT}" ]; then
-  rm -i "${OUTPUT}" # ask for confirmation
+  printf "remove ${OUTPUT}? "
+  read response
+  if [ "$response" == "y" ] || [ "$response" == "yes" ]; then
+    rm -f "${OUTPUT}"
+  else
+    exit 1
+  fi
 fi
 
 # run for each line in labeled corpus
@@ -29,7 +51,7 @@ for i in $( seq 1 $size); do
   progress=$(($i*100/$size))
   printf "$progress%%"
   tools/corpus.py -l $i "${GOLD}" "${DATADIR}" # make the train/test files
-  ./tagger.py --lang ${LANG} --train "${DATADIR}/train.txt" --test "${DATADIR}/test.txt"  --output "${TMP}" $@
+  ./tagger.py --lang ${MODEL_LANG} --train "${DATADIR}/train.txt" --test "${DATADIR}/test.txt"  --output "${TMP}" $@
   if [ $? -ne "0" ]; then # there was an error
     exit 1
   fi
@@ -44,5 +66,5 @@ done
 printf "\btagging complete.\n"
 
 # finally, score model:
-./score.py -v --lang ${LANG} --accuracy --confusion ${GOLD} ${OUTPUT}
+./score.py -v -l ${MODEL_LANG} -ab ${GOLD} ${OUTPUT} ${TAGSET}
 

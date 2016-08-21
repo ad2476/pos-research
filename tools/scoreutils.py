@@ -31,7 +31,7 @@ def calculateAccuracy(filePreparser, correctFile, estimateFile):
   return numCorrect/total
 
 """ Computes the confusion matrix for the tagged output """
-def calculateConfusion(filePreparser, gold, tagged):
+def calculateConfusion(filePreparser, gold, tagged, tagset=None):
   confusionCounts = defaultdict(int) # (ygold,ypred)->count
   labels = set()
 
@@ -46,7 +46,11 @@ def calculateConfusion(filePreparser, gold, tagged):
       labels.add(actual)
       labels.add(predicted)
 
-  labels = list(labels)
+  if tagset:
+    labels = list(tagset)
+  else:
+    labels = list(labels)
+
   labelHash = makeLabelHash(labels)
   n = len(labels)
   confusionMat = np.zeros([n]*2) # nxn matrix of confusion
